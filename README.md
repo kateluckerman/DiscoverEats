@@ -78,3 +78,48 @@ Users can swipe through restaurants in an area, adding ones they like to their l
 
 ## Wireframes
 <img src="https://github.com/kateluckerman/Explorator/blob/master/wireframes.jpg" width=600>
+
+## Schema 
+### Models
+#### User
+
+   | Property      | Type     | Description |
+   | ------------- | -------- | ------------|
+   | objectId      | String   | unique id for the user (default field) |
+   | username       | String | unique username for user (default field) |
+   | password     | String   | password for user (default field) |
+   | profileImage     | File   | profile picture for user |
+   | name | String | name of user |
+   |list | Array[Business] | list of user's saved businesses |
+   
+#### Business
+
+   | Property      | Type     | Description |
+   | ------------- | -------- | ------------|
+   | objectId      | String   | unique id for the business (default field) |
+   | name      | String | name of business |
+   | categories     | Array[String]  | list of business's categories |
+   | location     | String   | general location of business |
+   | address | String | address of business |
+   |price | Number | 1-5 integer rank of price level |
+   |rating | Number | 1-5 rank of user ratings |
+   |image | File | primary image for attraction |
+   
+### Networking
+#### List of network requests by screen
+   - Swipe/Home Screen
+      - (Read/GET) List of businesses from Yelp API
+      - (Create/POST) Create a new business object when restaurant is saved
+   - Profile Screen
+      - (Read/GET) Query logged in user object
+      - (Update/PUT) Update user profile image
+      - (Update/PUT) Update user's name
+      - (Read/GET) Query user's saved restaurants
+     
+#### Existing API Endpoints
+##### Yelp Fusion API
+- Base URL - [https://api.yelp.com/v3](https://api.yelp.com/v3)
+
+   HTTP Verb | Endpoint | Description
+   ----------|----------|------------
+    `GET`    | /businesses/search | get list of businesses based on location
