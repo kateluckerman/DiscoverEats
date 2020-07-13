@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">DiscoverEats</string>
+    <string name="login_text">Log In</string>
+    <string name="create_account">Create Account</string>
+    <string name="username_hint">username</string>
+    <string name="password_hint">password</string>
+    <string name="login_button">Discover</string>
+    <string name="confirm_hint">confirm password</string>
+</resources>
