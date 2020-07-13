@@ -6,4 +6,6 @@
     <string name="password_hint">password</string>
     <string name="login_button">Discover</string>
     <string name="confirm_hint">confirm password</string>
+    <string name="home_nav_button">Home</string>
+    <string name="profile_nav_button">Profile</string>
 </resources>
