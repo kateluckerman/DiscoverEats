@@ -1,6 +1,7 @@
 package com.kateluckerman.discovereats;
 
 import android.app.Application;
+
 import com.parse.Parse;
 
 import okhttp3.OkHttpClient;
@@ -29,6 +30,7 @@ public class ParseApplication extends Application {
                 .applicationId("discover-eats") // should correspond to APP_ID env variable
                 .clientKey("keytoeverything")  // set explicitly unless clientKey is explicitly configured on Parse server
                 .server("https://discover-eats.herokuapp.com/parse/").build());
+
     }
 }
 
