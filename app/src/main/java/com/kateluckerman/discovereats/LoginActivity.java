@@ -6,24 +6,36 @@ import androidx.databinding.DataBindingUtil;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kateluckerman.discovereats.databinding.ActivityLoginBinding;
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
+import com.parse.SignUpCallback;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static final String TAG = "LoginActivity";
+
     private ActivityLoginBinding binding;
     private boolean createAccount = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
-        // TODO: If user is already logged in, go to main activity
+        // if user is already logged in skip login activity
+        if (ParseUser.getCurrentUser() != null) {
+            goMainActivity();
+        }
 
         final TextView tvCreateAcc = binding.tvCreateAcc;
         final TextView tvLogin = binding.tvLogin;
@@ -50,16 +62,24 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+
         binding.btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Logic for create account/login
-//                if (createAccount) {
-//
-//                } else {
-//
-//                }
-                goMainActivity();
+
+                String username = binding.etUsername.getText().toString();
+                String password = binding.etPassword.getText().toString();
+
+                if (username.equals("") || password.equals("")) {
+                    Toast.makeText(getApplicationContext(), "You must enter a username and password", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                if (createAccount) {
+                    signUp(username, password);
+                } else {
+                    logIn(username, password);
+                }
             }
         });
     }
@@ -68,5 +88,34 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void signUp(String username, String password) {
+        ParseUser user = new ParseUser();
+        user.setUsername(username);
+        user.setPassword(password);
+
+        user.signUpInBackground(new SignUpCallback() {
+            public void done(ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Issue with signup", e);
+                    return;
+                }
+                goMainActivity();
+            }
+        });
+    }
+
+    private void logIn(String username, String password) {
+        ParseUser.logInInBackground(username, password, new LogInCallback() {
+            @Override
+            public void done(ParseUser user, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Issue with login", e);
+                    return;
+                }
+                goMainActivity();
+            }
+        });
     }
 }
