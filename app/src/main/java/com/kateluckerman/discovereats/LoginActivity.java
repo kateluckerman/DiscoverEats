@@ -28,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
         final TextView tvCreateAcc = binding.tvCreateAcc;
         final TextView tvLogin = binding.tvLogin;
 
+        // when "Log In" is clicked, it becomes black, "Create Account" becomes gray, and confirm goes away
         tvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -38,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // when "Create Account" is clicked, it becomes black, "Log In" becomes gray, and confirm shows up
         tvCreateAcc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
