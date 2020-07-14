@@ -43,9 +43,9 @@ public class ProfileFragment extends Fragment {
 
         rvList = view.findViewById(R.id.rvList);
 
+        // set up RecyclerView with adapter, layout manager, and empty business list
         allBusinesses = new ArrayList<>();
         adapter = new ListAdapter(getContext(), allBusinesses);
-
         rvList.setAdapter(adapter);
         rvList.setLayoutManager(new LinearLayoutManager(getContext()));
     }
