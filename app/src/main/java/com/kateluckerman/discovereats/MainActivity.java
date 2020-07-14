@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Swipe fragment is default, so swipe button is selected on activity loading
+        // Swipe fragment is default, so swipe button is selected on activity creation
         bottomNavigationView.setSelectedItemId(R.id.action_swipe);
     }
 }
