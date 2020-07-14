@@ -6,8 +6,8 @@ import com.parse.ParseUser;
 public class User {
 
     public static final String KEY_NAME = "name";
-    public static final String KEY_USERNAME = "username";
     public static final String KEY_PROFILE_IMAGE = "profileImage";
+    public static final String KEY_LIST = "list";
 
     public ParseUser user;
 
@@ -29,5 +29,9 @@ public class User {
 
     public ParseFile getProfileImage() {
         return user.getParseFile(KEY_PROFILE_IMAGE);
+    }
+
+    public void addToList(Business business) {
+//        user.getRelation(KEY_LIST).add(business.getParseBusiness());
     }
 }

@@ -1,5 +1,12 @@
 package com.kateluckerman.discovereats.models;
 
+import com.parse.ParseObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class Business {
@@ -11,14 +18,21 @@ public class Business {
     private int price;
     private double rating;
     private String photoURL;
+    private String objectID;
 
     // Methods to implement:
 
-//    public static Business fromJson(JSONObject jsonObject) throws JSONException
+    public static Business fromJson(JSONObject jsonObject) throws JSONException {
+        return new Business();
+    }
 
-//    public static List<Business> fromJsonArray(JSONArray jsonArray) throws JSONException
+    public static List<Business> fromJsonArray(JSONArray jsonArray) throws JSONException {
+        return new ArrayList<>();
+    }
 
 //    public void saveToParse()
+
+//    public ParseObject getParseBusiness()
 
     public String getName() {
         return name;
