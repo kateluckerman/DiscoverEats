@@ -1,6 +1,9 @@
 package com.kateluckerman.discovereats;
 
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+
+import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -95,17 +98,11 @@ public class SwipeFragment extends Fragment {
     private void loadBusinessView(Business business) {
         // TODO: Set image, price, and rating
         binding.tvName.setText(business.getName());
-        // convert list of categories to comma separated string
-        String categoriesText = "";
-        List<String> categories = business.getCategories();
-        for (int i = 0; i < categories.size(); i++) {
-            if (i != 0) {
-                categoriesText += ", ";
-            }
-            categoriesText += categories.get(i);
-        }
-        binding.tvCategories.setText(categoriesText);
+        binding.tvCategories.setText(business.getCategoryString());
         binding.tvLocation.setText(business.getLocation());
         binding.tvWebsite.setText(business.getWebsite());
+        final int resourceId = getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
+                getContext().getPackageName());
+        binding.ivRating.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId));
     }
 }

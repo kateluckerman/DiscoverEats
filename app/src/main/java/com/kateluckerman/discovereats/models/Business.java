@@ -1,5 +1,6 @@
 package com.kateluckerman.discovereats.models;
 
+import com.kateluckerman.discovereats.R;
 import com.parse.ParseObject;
 
 import org.json.JSONArray;
@@ -81,4 +82,57 @@ public class Business {
     }
 
     public String getWebsite() { return website; }
+
+    public String getCategoryString() {
+        // convert list of categories to comma separated string
+        String categoryString = "";
+        for (int i = 0; i < categories.size(); i++) {
+            if (i != 0) {
+                categoryString += ", ";
+            }
+            categoryString += categories.get(i);
+        }
+        return categoryString;
+    }
+
+    public String getRatingDrawableName(boolean vertical) {
+        int intRating = (int) (2 * rating);
+        String drawableFileName = "stars_small_";
+        switch (intRating) {
+            case 10: {
+                drawableFileName += "5";
+                break;
+            } case 9: {
+                drawableFileName += "4_half";
+                break;
+            } case 8: {
+                drawableFileName += "4";
+                break;
+            } case 7: {
+                drawableFileName += "3_half";
+                break;
+            } case 6: {
+                drawableFileName += "3";
+                break;
+            } case 5: {
+                drawableFileName += "2_half";
+                break;
+            } case 4: {
+                drawableFileName += "2";
+                break;
+            } case 3: {
+                drawableFileName += "1_half";
+                break;
+            } case 2: {
+                drawableFileName += "1";
+                break;
+            } default: {
+                drawableFileName += "0";
+                break;
+            }
+        }
+        if (vertical)
+            drawableFileName += "_v";
+        return drawableFileName;
+    }
 }
