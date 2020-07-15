@@ -1,57 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ProfileFragment">
 
-    <LinearLayout
-        android:id="@+id/llNames"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="12dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvName"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/llNames"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:textSize="24sp"
-            tools:text="Kate Lucky" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvUsername"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:gravity="center_horizontal"
-            tools:text="katelucky101" />
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/llEditName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
-    <ImageView
-        android:id="@+id/ivProfileImage"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_alignTop="@+id/llNames"
-        android:layout_alignBottom="@+id/llNames"
-        android:layout_alignParentEnd="true"
-        android:layout_gravity="end"
-        android:layout_marginTop="0dp"
-        android:layout_weight="0"
-        android:background="#FFFFFF"
-        tools:src="@tools:sample/avatars" />
+                <EditText
+                    android:id="@+id/etName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/add_name_hint"
+                    android:layout_margin="4dp"
+                    android:textSize="24sp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvList"
-        android:layout_width="381dp"
-        android:layout_height="393dp"
-        android:layout_below="@+id/llNames"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true" />
-</RelativeLayout>
+                <Button
+                    android:id="@+id/btnSaveName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Save" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:textSize="24sp"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center_horizontal"
+                tools:text="Kate Lucky" />
+
+            <TextView
+                android:id="@+id/tvUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center_horizontal"
+                tools:text="katelucky101" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivProfileImage"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_alignTop="@+id/llNames"
+            android:layout_alignBottom="@+id/llNames"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:layout_marginTop="0dp"
+            android:layout_weight="0"
+            android:background="#FFFFFF"
+            tools:src="@tools:sample/avatars" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvList"
+            android:layout_width="381dp"
+            android:layout_height="393dp"
+            android:layout_below="@+id/llNames"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
+</layout>

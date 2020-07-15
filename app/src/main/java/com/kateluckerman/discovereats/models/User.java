@@ -15,12 +15,17 @@ public class User {
         this.user = user;
     }
 
+    public ParseUser getUser() {
+        return user;
+    }
+
     public String getName() {
         return user.getString(KEY_NAME);
     }
 
     public void setName(String name) {
         user.put(KEY_NAME, name);
+        user.saveInBackground();
     }
 
     public String getUsername() {

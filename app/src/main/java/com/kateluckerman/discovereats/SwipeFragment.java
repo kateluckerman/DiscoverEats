@@ -37,9 +37,6 @@ import java.util.List;
 
 import okhttp3.Headers;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class SwipeFragment extends Fragment {
 
     public static final String YELP_SEARCH_ENDPOINT = "https://api.yelp.com/v3/businesses/search";
@@ -48,7 +45,6 @@ public class SwipeFragment extends Fragment {
     private FragmentSwipeBinding binding;
 
     List<Business> businesses;
-
     private int resultNumber;
 
     public SwipeFragment() {
@@ -67,8 +63,6 @@ public class SwipeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
         getYelpResults();
     }
 
@@ -95,6 +89,7 @@ public class SwipeFragment extends Fragment {
                     resultNumber = 0;
                     loadBusinessView(businesses.get(0));
 
+                    // fork icon saves business and loads next
                     binding.ivFork.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -103,6 +98,7 @@ public class SwipeFragment extends Fragment {
                         }
                     });
 
+                    // x icon loads next
                     binding.ivX.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -125,10 +121,10 @@ public class SwipeFragment extends Fragment {
         binding.tvName.setText(business.getName());
         binding.tvCategories.setText(business.getCategoryString());
         binding.tvLocation.setText(business.getLocation());
+        binding.tvPrice.setText(business.getPrice());
         final int resourceId = getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
                 getContext().getPackageName());
         binding.ivRating.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId));
-        binding.tvPrice.setText(business.getPrice());
         Glide.with(getContext()).load(business.getPhotoURL()).into(binding.ivMainImage);
         // Create "view on Yelp" link and set the textview to respond to link clicks
         Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");

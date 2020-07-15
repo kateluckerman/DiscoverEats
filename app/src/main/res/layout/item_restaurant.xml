@@ -45,59 +45,14 @@
         android:layout_marginTop="4dp"
         tools:text="Short North" />
 
-    <LinearLayout
-        android:id="@+id/llRating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/ivMainImage"
-        android:layout_alignParentTop="false"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="8dp"
-        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/ivStar1"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@android:drawable/star_off" />
-
-        <ImageView
-            android:id="@+id/ivStar2"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@android:drawable/star_off" />
-
-        <ImageView
-            android:id="@+id/ivStar3"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@android:drawable/star_off" />
-
-        <ImageView
-            android:id="@+id/ivStar4"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@android:drawable/star_off" />
-
-        <ImageView
-            android:id="@+id/ivStar5"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@android:drawable/star_off" />
-
-    </LinearLayout>
 
     <TextView
         android:id="@+id/tvPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/llRating"
-        android:layout_alignEnd="@+id/llRating"
+        android:layout_below="@+id/ivRating"
+        android:layout_alignEnd="@+id/ivRating"
         android:layout_marginTop="8dp"
         android:textSize="18sp"
         tools:text="$$$" />
@@ -107,8 +62,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvPrice"
-        android:layout_alignEnd="@+id/llRating"
+        android:layout_alignEnd="@+id/ivRating"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="8dp"
         tools:text="website-restaurant.com" />
+
+    <ImageView
+        android:id="@+id/ivRating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        tools:srcCompat="@drawable/stars_small_0" />
 </RelativeLayout>

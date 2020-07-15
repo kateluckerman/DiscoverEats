@@ -31,7 +31,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ListAdapter.ViewHolder holder, int position) {
-
+        Business business = businesses.get(position);
+        holder.bind(business);
     }
 
     @Override
@@ -43,6 +44,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+        }
+
+        public void bind(Business business) {
+            business.getFromParse();
         }
     }
 }

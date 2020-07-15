@@ -3,6 +3,7 @@ package com.kateluckerman.discovereats;
 import android.app.Application;
 
 import com.kateluckerman.discovereats.models.Business;
+import com.kateluckerman.discovereats.models.User;
 import com.parse.Parse;
 import com.parse.ParseObject;
 

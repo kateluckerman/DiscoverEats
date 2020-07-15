@@ -32,10 +32,9 @@ public class Business extends ParseObject {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_IMAGE_URL = "imageURL";
 
-    // Methods to implement:
-
     public Business() {}
 
+    // sets business fields based on Yelp request JSON object information
     public static Business fromJson(JSONObject jsonObject) throws JSONException {
         Business business = new Business();
         business.name = jsonObject.getString("name");
@@ -53,6 +52,7 @@ public class Business extends ParseObject {
         return business;
     }
 
+    // processes businesses JSON array from Yelp request
     public static List<Business> fromJsonArray(JSONArray jsonArray) throws JSONException {
         List<Business> tweets = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -71,7 +71,15 @@ public class Business extends ParseObject {
         put(KEY_IMAGE_URL, photoURL);
     }
 
-//    public ParseObject getParseBusiness()
+    public void getFromParse() {
+        name = getString(KEY_NAME);
+        categories = getList(KEY_CATEGORIES);
+        location = getString(KEY_LOCATION);
+        address = getString(KEY_ADDRESS);
+        price = getString(KEY_PRICE);
+        rating = getDouble(KEY_RATING);
+        photoURL = getString(KEY_IMAGE_URL);
+    }
 
     public String getName() {
         return name;
@@ -103,8 +111,8 @@ public class Business extends ParseObject {
 
     public String getWebsite() { return website; }
 
+    // convert list of categories to comma separated string
     public String getCategoryString() {
-        // convert list of categories to comma separated string
         String categoryString = "";
         for (int i = 0; i < categories.size(); i++) {
             if (i != 0) {
