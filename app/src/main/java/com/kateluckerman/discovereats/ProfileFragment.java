@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,11 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.kateluckerman.discovereats.databinding.FragmentProfileBinding;
-import com.kateluckerman.discovereats.databinding.FragmentSwipeBinding;
 import com.kateluckerman.discovereats.models.Business;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
@@ -77,6 +74,11 @@ public class ProfileFragment extends Fragment {
         binding.tvUsername.setText(user.getUsername());
         allBusinesses = new ArrayList<>();
 
+        // set up RecyclerView with adapter, layout manager, and empty business list
+        adapter = new ListAdapter(getContext(), allBusinesses);
+        binding.rvList.setAdapter(adapter);
+        binding.rvList.setLayoutManager(new LinearLayoutManager(getContext()));
+
         // get the user's saved business list
         ParseRelation<Business> list = user.getUser().getRelation(User.KEY_LIST);
         list.getQuery().findInBackground(new FindCallback<Business>() {
@@ -87,11 +89,7 @@ public class ProfileFragment extends Fragment {
                 } else {
                     Log.i(TAG, "success");
                     allBusinesses.addAll(objects);
-
-                    // set up RecyclerView with adapter, layout manager, and business list
-                    adapter = new ListAdapter(getContext(), allBusinesses);
-                    binding.rvList.setAdapter(adapter);
-                    binding.rvList.setLayoutManager(new LinearLayoutManager(getContext()));
+                    adapter.notifyDataSetChanged();
                 }
             }
         });
