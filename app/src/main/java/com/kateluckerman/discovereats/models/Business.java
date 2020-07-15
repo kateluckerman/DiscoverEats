@@ -1,6 +1,6 @@
 package com.kateluckerman.discovereats.models;
 
-import com.kateluckerman.discovereats.R;
+import com.parse.ParseClassName;
 import com.parse.ParseObject;
 
 import org.json.JSONArray;
@@ -10,7 +10,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Business {
+@ParseClassName("Business")
+public class Business extends ParseObject {
 
     private String name;
     private List<String> categories;
@@ -22,7 +23,18 @@ public class Business {
     private String website;
     private String objectID;
 
+    public static final String KEY_NAME = "name";
+    public static final String KEY_CATEGORIES = "categories";
+    public static final String KEY_LOCATION = "location";
+    public static final String KEY_ADDRESS = "address";
+    public static final String KEY_PRICE = "price";
+    public static final String KEY_RATING = "rating";
+    public static final String KEY_IMAGE = "image";
+    public static final String KEY_IMAGE_URL = "imageURL";
+
     // Methods to implement:
+
+    public Business() {}
 
     public static Business fromJson(JSONObject jsonObject) throws JSONException {
         Business business = new Business();
@@ -49,7 +61,15 @@ public class Business {
         return tweets;
     }
 
-//    public void saveToParse()
+    public void setParseFields() {
+        put(KEY_NAME, name);
+        addAll(KEY_CATEGORIES, categories);
+        put(KEY_LOCATION, location);
+        put(KEY_ADDRESS, address);
+        put(KEY_PRICE, price);
+        put(KEY_RATING, rating);
+        put(KEY_IMAGE_URL, photoURL);
+    }
 
 //    public ParseObject getParseBusiness()
 

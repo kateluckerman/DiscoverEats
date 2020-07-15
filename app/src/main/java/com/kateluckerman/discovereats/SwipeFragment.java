@@ -1,9 +1,7 @@
 package com.kateluckerman.discovereats;
 
 import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.codepath.asynchttpclient.AsyncHttpClient;
@@ -25,6 +24,10 @@ import com.codepath.asynchttpclient.RequestParams;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.kateluckerman.discovereats.databinding.FragmentSwipeBinding;
 import com.kateluckerman.discovereats.models.Business;
+import com.kateluckerman.discovereats.models.User;
+import com.parse.ParseException;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +49,8 @@ public class SwipeFragment extends Fragment {
 
     List<Business> businesses;
 
+    private int resultNumber;
+
     public SwipeFragment() {
         // Required empty public constructor
     }
@@ -63,6 +68,7 @@ public class SwipeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
         getYelpResults();
     }
 
@@ -70,23 +76,39 @@ public class SwipeFragment extends Fragment {
         // set up request with parameters and api key header
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        // TODO: Use user's location instead of placeholder and expand limit
-        params.put("limit", 2);
+        // TODO: Use user's location instead of placeholder
         params.put("location", "st louis");
+        params.put("categories", "restaurants");
         RequestHeaders requestHeaders = new RequestHeaders();
         requestHeaders.put("Authorization", "Bearer " + getString(R.string.yelp_api_key));
 
         // send request
         client.get(YELP_SEARCH_ENDPOINT, requestHeaders, params, new JsonHttpResponseHandler() {
             @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
+            public void onSuccess(final int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
                 try {
                     // convert result into global list of Business objects
                     JSONArray results = jsonObject.getJSONArray("businesses");
-                    businesses = Business.fromJsonArray(results);
-                    loadBusinessView(businesses.get(1));
                     Log.i(TAG, "Success with Yelp network request: " + results.toString());
+                    businesses = Business.fromJsonArray(results);
+                    resultNumber = 0;
+                    loadBusinessView(businesses.get(0));
+
+                    binding.ivFork.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            saveBusiness(businesses.get(resultNumber));
+                            loadNextResult();
+                        }
+                    });
+
+                    binding.ivX.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            loadNextResult();
+                        }
+                    });
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -112,5 +134,28 @@ public class SwipeFragment extends Fragment {
         Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");
         binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
         binding.tvWebsite.setText(html);
+    }
+
+    private void saveBusiness(final Business business) {
+        business.setParseFields();
+        business.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null) {
+                    Log.e("TAG", "Error while saving", e);
+                    Toast.makeText(getContext(), "Error while saving!", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Log.i(TAG, "Business save was successful!");
+                    // TODO: Better error handling - only load next business if saved successfully
+                    ParseUser.getCurrentUser().getRelation(User.KEY_LIST).add(business);
+                    ParseUser.getCurrentUser().saveInBackground();
+                }
+            }
+        });
+    }
+    private void loadNextResult() {
+        resultNumber ++;
+        loadBusinessView(businesses.get(resultNumber));
     }
 }
