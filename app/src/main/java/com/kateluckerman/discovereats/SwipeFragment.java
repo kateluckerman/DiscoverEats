@@ -10,11 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.codepath.asynchttpclient.AsyncHttpClient;
 import com.codepath.asynchttpclient.RequestHeaders;
 import com.codepath.asynchttpclient.RequestParams;
@@ -73,7 +77,7 @@ public class SwipeFragment extends Fragment {
         requestHeaders.put("Authorization", "Bearer " + getString(R.string.yelp_api_key));
 
         // send request
-        client.get(YELP_SEARCH_ENDPOINT, requestHeaders, params,  new JsonHttpResponseHandler() {
+        client.get(YELP_SEARCH_ENDPOINT, requestHeaders, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
@@ -81,7 +85,7 @@ public class SwipeFragment extends Fragment {
                     // convert result into global list of Business objects
                     JSONArray results = jsonObject.getJSONArray("businesses");
                     businesses = Business.fromJsonArray(results);
-                    loadBusinessView(businesses.get(0));
+                    loadBusinessView(businesses.get(1));
                     Log.i(TAG, "Success with Yelp network request: " + results.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -96,13 +100,17 @@ public class SwipeFragment extends Fragment {
     }
 
     private void loadBusinessView(Business business) {
-        // TODO: Set image, price, and rating
         binding.tvName.setText(business.getName());
         binding.tvCategories.setText(business.getCategoryString());
         binding.tvLocation.setText(business.getLocation());
-        binding.tvWebsite.setText(business.getWebsite());
         final int resourceId = getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
                 getContext().getPackageName());
         binding.ivRating.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId));
+        binding.tvPrice.setText(business.getPrice());
+        Glide.with(getContext()).load(business.getPhotoURL()).into(binding.ivMainImage);
+        // Create "view on Yelp" link and set the textview to respond to link clicks
+        Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");
+        binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
+        binding.tvWebsite.setText(html);
     }
 }

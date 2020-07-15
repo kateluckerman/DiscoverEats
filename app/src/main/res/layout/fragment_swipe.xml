@@ -6,7 +6,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="12dp"
         tools:context=".SwipeFragment">
 
         <LinearLayout
@@ -60,7 +59,7 @@
             android:id="@+id/tvWebsite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/llButtons"
+            android:layout_above="@id/horizontalLine"
             android:layout_alignStart="@+id/tvName"
             android:layout_marginBottom="8dp"
             android:textSize="18sp"
@@ -86,68 +85,25 @@
             android:textSize="20sp"
             tools:text="Mediterranean, Greek" />
 
-<!--        <LinearLayout-->
-<!--            android:id="@+id/llStars"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_above="@+id/llButtons"-->
-<!--            android:layout_alignTop="@+id/tvName"-->
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:orientation="vertical">-->
-
-        <!--            <ImageView-->
-<!--                android:id="@+id/ivStar1"-->
-<!--                android:layout_width="20dp"-->
-<!--                android:layout_height="20dp"-->
-<!--                android:layout_gravity="center_horizontal"-->
-<!--                android:src="@android:drawable/star_off" />-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/ivStar2"-->
-<!--                android:layout_width="20dp"-->
-<!--                android:layout_height="20dp"-->
-<!--                android:layout_gravity="center_horizontal"-->
-<!--                android:src="@android:drawable/star_off" />-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/ivStar3"-->
-<!--                android:layout_width="20dp"-->
-<!--                android:layout_height="20dp"-->
-<!--                android:layout_gravity="center_horizontal"-->
-<!--                android:src="@android:drawable/star_off" />-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/ivStar4"-->
-<!--                android:layout_width="20dp"-->
-<!--                android:layout_height="20dp"-->
-<!--                android:layout_gravity="center_horizontal"-->
-<!--                android:src="@android:drawable/star_off" />-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/ivStar5"-->
-<!--                android:layout_width="20dp"-->
-<!--                android:layout_height="20dp"-->
-<!--                android:layout_gravity="center_horizontal"-->
-<!--                android:src="@android:drawable/star_off" />-->
 
         <ImageView
             android:id="@+id/ivRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/tvPrice"
+            android:layout_alignStart="@+id/tvPrice"
             android:layout_alignTop="@+id/tvName"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="4dp"
+            android:layout_alignEnd="@+id/tvPrice"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
+            android:foregroundGravity="center_horizontal"
             tools:srcCompat="@drawable/stars_small_0" />
 
         <TextView
             android:id="@+id/tvPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/llButtons"
+            android:layout_above="@id/horizontalLine"
             android:layout_alignEnd="@+id/ivMainImage"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -156,7 +112,14 @@
             android:gravity="center_vertical"
             android:textSize="18sp"
             tools:text="$$$" />
-        <!--        </LinearLayout>-->
+
+        <View
+            android:id="@+id/horizontalLine"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_above="@id/llButtons"
+            android:layout_marginTop="8dp"
+            android:background="@color/black" />
 
     </RelativeLayout>
 </layout>
