@@ -45,7 +45,8 @@ public class Business extends ParseObject {
         }
         business.location = jsonObject.getJSONObject("location").getString("city");
         business.address = jsonObject.getJSONObject("location").getString("address1");
-        business.price = jsonObject.getString("price");
+        if (jsonObject.has("price"))
+            business.price = jsonObject.getString("price");
         business.rating = jsonObject.getDouble("rating");
         business.photoURL = jsonObject.getString("image_url");
         business.website = jsonObject.getString("url");

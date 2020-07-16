@@ -47,7 +47,10 @@ public class SwipeFragment extends Fragment {
 
     List<Business> businesses;
     public static final int LIMIT = 5;
-    private int resultIndex = -1;
+    public static final int FIRST_CALL_INDEX = -1;
+
+    private int resultIndex;
+    private int resultTotal;
 
     public SwipeFragment() {
         // Required empty public constructor
@@ -64,6 +67,7 @@ public class SwipeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        resultIndex = FIRST_CALL_INDEX;
         businesses = new ArrayList<>();
         getYelpResults();
     }
@@ -73,8 +77,8 @@ public class SwipeFragment extends Fragment {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         // if not the first call, tell API to only load results after current one
-        if (resultIndex != -1) {
-            params.put("offset", resultIndex - 1);
+        if (resultIndex != FIRST_CALL_INDEX) {
+            params.put("offset", resultIndex);
         }
         params.put("limit", LIMIT);
         params.put("location", "st louis");
@@ -88,12 +92,17 @@ public class SwipeFragment extends Fragment {
             public void onSuccess(final int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
                 try {
+                    // the Yelp API can return either 1000 businesses or the value in "total" if <1000
+                    resultTotal = jsonObject.getInt("total");
+                    if (resultTotal > 1000) {
+                        resultTotal = 1000;
+                    }
                     // add result into global list of Business objects
                     JSONArray results = jsonObject.getJSONArray("businesses");
-                    Log.i(TAG, "Success with Yelp network request: " + results.toString());
+                    Log.i(TAG, "Success with Yelp network request: " + jsonObject.toString());
                     businesses.addAll(Business.fromJsonArray(results));
                     // if first call, set index to 0
-                    if (resultIndex == -1)
+                    if (resultIndex == FIRST_CALL_INDEX)
                         resultIndex = 0;
                     loadBusinessView(businesses.get(resultIndex));
 
@@ -160,6 +169,16 @@ public class SwipeFragment extends Fragment {
     }
     private void loadNextResult() {
         resultIndex++;
+        if (resultIndex >= resultTotal) {
+            Toast.makeText(getContext(), "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
+            binding.ivFork.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(getContext(), "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
+                }
+            });
+            return;
+        }
         if (businesses.size() <= resultIndex)
             getYelpResults();
         else
