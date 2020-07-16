@@ -44,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 createAccount = false;
                 tvLogin.setTextColor(Color.BLACK);
-                tvCreateAcc.setTextColor(getResources().getColor(R.color.unselected_text));
+                tvCreateAcc.setTextColor(getResources().getColor(R.color.unselected_text, getTheme()));
                 binding.etConfirmPass.setVisibility(View.GONE);
             }
         });
@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 createAccount = true;
                 tvCreateAcc.setTextColor(Color.BLACK);
-                tvLogin.setTextColor(getResources().getColor(R.color.unselected_text));
+                tvLogin.setTextColor(getResources().getColor(R.color.unselected_text, getTheme()));
                 binding.etConfirmPass.setVisibility(View.VISIBLE);
             }
         });
@@ -67,13 +67,19 @@ public class LoginActivity extends AppCompatActivity {
 
                 String username = binding.etUsername.getText().toString();
                 String password = binding.etPassword.getText().toString();
+                String passConfirm = binding.etConfirmPass.getText().toString();
 
                 if (username.equals("") || password.equals("")) {
-                    Toast.makeText(getApplicationContext(), "You must enter a username and password", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "You must enter a username and password.", Toast.LENGTH_LONG).show();
                     return;
                 }
 
                 if (createAccount) {
+                    // check that password and confirm password are the same
+                    if (!passConfirm.equals(password)) {
+                        Toast.makeText(LoginActivity.this, "Password confirmation does not match password.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     signUp(username, password);
                 } else {
                     logIn(username, password);
@@ -92,11 +98,12 @@ public class LoginActivity extends AppCompatActivity {
         ParseUser user = new ParseUser();
         user.setUsername(username);
         user.setPassword(password);
-
         user.signUpInBackground(new SignUpCallback() {
             public void done(ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with signup", e);
+                    // display error messages and log errors
+                    Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Issue with sign-up", e);
                     return;
                 }
                 goMainActivity();
@@ -109,6 +116,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void done(ParseUser user, ParseException e) {
                 if (e != null) {
+                    // display error messages and log errors
+                    Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     Log.e(TAG, "Issue with login", e);
                     return;
                 }
