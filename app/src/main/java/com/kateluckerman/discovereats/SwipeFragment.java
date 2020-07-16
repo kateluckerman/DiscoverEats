@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Headers;
@@ -45,7 +46,8 @@ public class SwipeFragment extends Fragment {
     private FragmentSwipeBinding binding;
 
     List<Business> businesses;
-    private int resultNumber;
+    public static final int LIMIT = 5;
+    private int resultIndex = -1;
 
     public SwipeFragment() {
         // Required empty public constructor
@@ -56,13 +58,13 @@ public class SwipeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentSwipeBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
-        return view;
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        businesses = new ArrayList<>();
         getYelpResults();
     }
 
@@ -70,7 +72,11 @@ public class SwipeFragment extends Fragment {
         // set up request with parameters and api key header
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        // TODO: Use user's location instead of placeholder
+        // if not the first call, tell API to only load results after current one
+        if (resultIndex != -1) {
+            params.put("offset", resultIndex - 1);
+        }
+        params.put("limit", LIMIT);
         params.put("location", "st louis");
         params.put("categories", "restaurants");
         RequestHeaders requestHeaders = new RequestHeaders();
@@ -82,18 +88,20 @@ public class SwipeFragment extends Fragment {
             public void onSuccess(final int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
                 try {
-                    // convert result into global list of Business objects
+                    // add result into global list of Business objects
                     JSONArray results = jsonObject.getJSONArray("businesses");
                     Log.i(TAG, "Success with Yelp network request: " + results.toString());
-                    businesses = Business.fromJsonArray(results);
-                    resultNumber = 0;
-                    loadBusinessView(businesses.get(0));
+                    businesses.addAll(Business.fromJsonArray(results));
+                    // if first call, set index to 0
+                    if (resultIndex == -1)
+                        resultIndex = 0;
+                    loadBusinessView(businesses.get(resultIndex));
 
                     // fork icon saves business and loads next
                     binding.ivFork.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            saveBusiness(businesses.get(resultNumber));
+                            saveBusiness(businesses.get(resultIndex));
                             loadNextResult();
                         }
                     });
@@ -151,7 +159,10 @@ public class SwipeFragment extends Fragment {
         });
     }
     private void loadNextResult() {
-        resultNumber ++;
-        loadBusinessView(businesses.get(resultNumber));
+        resultIndex++;
+        if (businesses.size() <= resultIndex)
+            getYelpResults();
+        else
+            loadBusinessView(businesses.get(resultIndex));
     }
 }
