@@ -60,7 +60,7 @@ public class SwipeFragment extends Fragment {
     // stores the index of user's last seen result out of results of the most recent API call
     private int APIresultIndex;
 
-    // this dictates how many results the API gets with each call - max allowed is 50
+    // dictates how many results the API gets with each call - max allowed is 50
     public static final int LIMIT = 5;
 
     ParseUser currUser;
@@ -88,7 +88,7 @@ public class SwipeFragment extends Fragment {
         location = "Chesterfield"; // this is a placeholder location to be changed based on user later
 
         // check if the user already has a search with the same location
-        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo("location", location).findInBackground(new FindCallback<ParseObject>() {
+        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e != null) {
@@ -98,8 +98,8 @@ public class SwipeFragment extends Fragment {
                 // if no matching search is found
                 if (objects.isEmpty()) {
                     // create a new search with these parameters
-                    currSearch = new ParseObject("Search");
-                    currSearch.put("location", location);
+                    currSearch = new ParseObject(User.Search.CLASS_NAME);
+                    currSearch.put(User.Search.KEY_LOCATION, location);
                     currSearch.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
@@ -114,7 +114,7 @@ public class SwipeFragment extends Fragment {
                     // save the Parse search locally so the user's progress can be updated
                     currSearch = objects.get(0);
                     // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
-                    if (objects.get(0).getNumber("searchIndex") != null) {
+                    if (objects.get(0).getNumber(User.Search.KEY_SEARCH_INDEX) != null) {
                         searchIndex = (int) objects.get(0).getNumber("searchIndex") - 1;
                     } else {
                         searchIndex = INITIAL_INDEX;
@@ -242,7 +242,7 @@ public class SwipeFragment extends Fragment {
         APIresultIndex++;
         searchIndex++;
         // save the progress through this search
-        currSearch.put("searchIndex", searchIndex);
+        currSearch.put(User.Search.KEY_SEARCH_INDEX, searchIndex);
         currSearch.saveInBackground();
         // load the business
         loadBusinessView(businesses.get(APIresultIndex));
