@@ -127,38 +127,9 @@ public class Business extends ParseObject {
     public String getRatingDrawableName(boolean vertical) {
         int intRating = (int) (2 * rating);
         String drawableFileName = "stars_small_";
-        switch (intRating) {
-            case 10: {
-                drawableFileName += "5";
-                break;
-            } case 9: {
-                drawableFileName += "4_half";
-                break;
-            } case 8: {
-                drawableFileName += "4";
-                break;
-            } case 7: {
-                drawableFileName += "3_half";
-                break;
-            } case 6: {
-                drawableFileName += "3";
-                break;
-            } case 5: {
-                drawableFileName += "2_half";
-                break;
-            } case 4: {
-                drawableFileName += "2";
-                break;
-            } case 3: {
-                drawableFileName += "1_half";
-                break;
-            } case 2: {
-                drawableFileName += "1";
-                break;
-            } default: {
-                drawableFileName += "0";
-                break;
-            }
+        drawableFileName += intRating / 2;
+        if (intRating % 2 != 0) {
+            drawableFileName += "_half";
         }
         if (vertical)
             drawableFileName += "_v";

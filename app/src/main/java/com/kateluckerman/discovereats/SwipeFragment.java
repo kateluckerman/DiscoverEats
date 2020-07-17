@@ -85,7 +85,7 @@ public class SwipeFragment extends Fragment {
 
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
-        location = "Warsaw, Missouri"; // this is a placeholder location to be changed based on user later
+        location = "Chesterfield"; // this is a placeholder location to be changed based on user later
 
         // check if the user already has a search with the same location
         currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo("location", location).findInBackground(new FindCallback<ParseObject>() {

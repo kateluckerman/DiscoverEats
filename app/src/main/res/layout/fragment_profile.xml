@@ -66,7 +66,8 @@
             android:layout_height="48dp"
             android:layout_alignTop="@+id/llNames"
             android:layout_alignBottom="@+id/llNames"
-            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="false"
             android:layout_gravity="end"
             android:layout_marginTop="0dp"
             android:layout_weight="0"
@@ -81,5 +82,17 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true" />
+
+        <TextView
+            android:id="@+id/tvLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/llNames"
+            android:layout_alignBottom="@+id/llNames"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/llNames"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/log_out_button" />
+
     </RelativeLayout>
 </layout>

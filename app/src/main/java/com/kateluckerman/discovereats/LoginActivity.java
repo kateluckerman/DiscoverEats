@@ -69,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                 String password = binding.etPassword.getText().toString();
                 String passConfirm = binding.etConfirmPass.getText().toString();
 
-                if (username.equals("") || password.equals("")) {
+                if (username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "You must enter a username and password.", Toast.LENGTH_LONG).show();
                     return;
                 }

@@ -1,5 +1,6 @@
 package com.kateluckerman.discovereats;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -73,6 +74,17 @@ public class ProfileFragment extends Fragment {
         // set username in view and initialize business array
         binding.tvUsername.setText(user.getUsername());
         allBusinesses = new ArrayList<>();
+
+        // on "Log Out" click, loads login screen and finished current activity
+        binding.tvLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ParseUser.logOut();
+                Intent intent = new Intent(getContext(), LoginActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
 
         // set up RecyclerView with adapter, layout manager, and empty business list
         adapter = new ListAdapter(getContext(), allBusinesses);
