@@ -17,29 +17,31 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="8dp"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/ivBottomL"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
                 android:layout_weight="1"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/login_images_5" />
 
             <ImageView
                 android:id="@+id/ivBottomMid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
                 android:layout_weight="1"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/login_images_2" />
 
             <ImageView
                 android:id="@+id/ivBottomR"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
                 android:layout_weight="1"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/login_images_1" />
         </LinearLayout>
 
         <LinearLayout
@@ -49,29 +51,31 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/ivTopL"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
                 android:layout_weight="0.333"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/login_images_6" />
 
             <ImageView
                 android:id="@+id/ivTopMid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
                 android:layout_weight="0.333"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/login_images_3" />
 
             <ImageView
                 android:id="@+id/ivTopR"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
                 android:layout_weight="0.333"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/login_images_4" />
         </LinearLayout>
 
         <LinearLayout
