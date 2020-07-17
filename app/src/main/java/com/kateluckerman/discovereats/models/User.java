@@ -8,6 +8,7 @@ public class User {
     public static final String KEY_NAME = "name";
     public static final String KEY_PROFILE_IMAGE = "profileImage";
     public static final String KEY_LIST = "list";
+    public static final String KEY_SEARCHES = "searches";
 
     public ParseUser user;
 
