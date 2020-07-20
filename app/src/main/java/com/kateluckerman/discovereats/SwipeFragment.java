@@ -6,13 +6,16 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -76,7 +79,17 @@ public class SwipeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment and apply ViewBinding
         binding = FragmentSwipeBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+        View view = binding.getRoot();
+
+        final GestureDetector gestureDetector = setUpSwiping();
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        });
+
+        return view;
     }
 
     @Override
@@ -85,7 +98,7 @@ public class SwipeFragment extends Fragment {
 
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
-        location = "Chesterfield"; // this is a placeholder location to be changed based on user later
+        location = "St Louis County"; // this is a placeholder location to be changed based on user later
 
         // check if the user already has a search with the same location
         currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).findInBackground(new FindCallback<ParseObject>() {
@@ -184,6 +197,45 @@ public class SwipeFragment extends Fragment {
                 Log.e(TAG, "Failure of Yelp network request: " + response, throwable);
             }
         });
+    }
+
+    private GestureDetector setUpSwiping() {
+        final GestureDetector gesture = new GestureDetector(getActivity(),
+                new GestureDetector.SimpleOnGestureListener() {
+
+                    @Override
+                    public boolean onDown(MotionEvent e) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                                           float velocityY) {
+
+                        final int SWIPE_MIN_DISTANCE = 120;
+                        final int SWIPE_MAX_OFF_PATH = 250;
+                        final int SWIPE_THRESHOLD_VELOCITY = 200;
+                        try {
+                            // moved too much in Y direction
+                            if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                                return false;
+                            // swipe right to left
+                            if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+                                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                                loadNextResult();
+                            }
+                            // swipe left to right
+                            else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
+                                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                                saveAndLoadNext(businesses.get(APIresultIndex));
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        }
+                        return super.onFling(e1, e2, velocityX, velocityY);
+                    }
+                });
+        return gesture;
     }
 
     private void loadBusinessView(Business business) {

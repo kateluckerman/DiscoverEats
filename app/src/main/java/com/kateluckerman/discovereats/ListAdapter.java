@@ -59,7 +59,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             binding.tvCategory.setText(business.getCategoryString());
             binding.tvLocation.setText(business.getLocation());
             binding.tvPrice.setText(business.getPrice());
-            final int resourceId = context.getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
+            final int resourceId = context.getResources().getIdentifier(business.getRatingDrawableName(false), "drawable",
                     context.getPackageName());
             binding.ivRating.setImageDrawable(ContextCompat.getDrawable(context, resourceId));
             Glide.with(context).load(business.getPhotoURL()).into(binding.ivMainImage);
