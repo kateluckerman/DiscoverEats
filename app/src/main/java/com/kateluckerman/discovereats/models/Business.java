@@ -31,6 +31,7 @@ public class Business extends ParseObject {
     public static final String KEY_RATING = "rating";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_IMAGE_URL = "imageURL";
+    public static final String KEY_WEBSITE = "website";
 
     public Business() {}
 
@@ -70,6 +71,7 @@ public class Business extends ParseObject {
         put(KEY_PRICE, price);
         put(KEY_RATING, rating);
         put(KEY_IMAGE_URL, photoURL);
+        put(KEY_WEBSITE, website);
     }
 
     public void getFromParse() {
@@ -80,6 +82,7 @@ public class Business extends ParseObject {
         price = getString(KEY_PRICE);
         rating = getDouble(KEY_RATING);
         photoURL = getString(KEY_IMAGE_URL);
+        website = getString(KEY_WEBSITE);
     }
 
     public String getName() {
