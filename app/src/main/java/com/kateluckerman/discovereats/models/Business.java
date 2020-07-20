@@ -21,6 +21,7 @@ public class Business extends ParseObject {
     private double rating;
     private String photoURL;
     private String website;
+    private String alias;
     private String objectID;
 
     public static final String KEY_NAME = "name";
@@ -32,6 +33,7 @@ public class Business extends ParseObject {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_IMAGE_URL = "imageURL";
     public static final String KEY_WEBSITE = "website";
+    public static final String KEY_ALIAS = "alias";
 
     public Business() {}
 
@@ -51,6 +53,7 @@ public class Business extends ParseObject {
         business.rating = jsonObject.getDouble("rating");
         business.photoURL = jsonObject.getString("image_url");
         business.website = jsonObject.getString("url");
+        business.alias = jsonObject.getString("alias");
         return business;
     }
 
@@ -72,6 +75,7 @@ public class Business extends ParseObject {
         put(KEY_RATING, rating);
         put(KEY_IMAGE_URL, photoURL);
         put(KEY_WEBSITE, website);
+        put(KEY_ALIAS, alias);
     }
 
     public void getFromParse() {
@@ -83,6 +87,7 @@ public class Business extends ParseObject {
         rating = getDouble(KEY_RATING);
         photoURL = getString(KEY_IMAGE_URL);
         website = getString(KEY_WEBSITE);
+        alias = getString(KEY_ALIAS);
     }
 
     public String getName() {
@@ -114,6 +119,8 @@ public class Business extends ParseObject {
     }
 
     public String getWebsite() { return website; }
+
+    public String getAlias() {return alias; }
 
     // convert list of categories to comma separated string
     public String getCategoryString() {

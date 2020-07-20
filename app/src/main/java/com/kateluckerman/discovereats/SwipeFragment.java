@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 
 import android.text.Html;
@@ -31,6 +30,7 @@ import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -98,7 +98,7 @@ public class SwipeFragment extends Fragment {
 
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
-        location = "St Louis County"; // this is a placeholder location to be changed based on user later
+        location = "Chesterfield, mo"; // this is a placeholder location to be changed based on user later
 
         // check if the user already has a search with the same location
         currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).findInBackground(new FindCallback<ParseObject>() {
@@ -254,17 +254,34 @@ public class SwipeFragment extends Fragment {
     }
 
     private void saveAndLoadNext(final Business business) {
-        business.setParseFields();
-        business.saveInBackground(new SaveCallback() {
+        ParseQuery<Business> query = ParseQuery.getQuery("Business");
+        query.whereEqualTo(Business.KEY_ALIAS, business.getAlias());
+        query.findInBackground(new FindCallback<Business>() {
             @Override
-            public void done(ParseException e) {
+            public void done(List<Business> objects, ParseException e) {
                 if (e != null) {
-                    Log.e("TAG", "Error while saving", e);
-                    Toast.makeText(getContext(), "Error while saving!", Toast.LENGTH_SHORT).show();
-
-                } else {
-                    Log.i(TAG, "Business save was successful!");
-                    currUser.getRelation(User.KEY_LIST).add(business);
+                    Log.e(TAG, e.getMessage(), e);
+                    return;
+                }
+                // if the business is not already stored in Parse, save it and load next
+                if (objects.isEmpty()) {
+                    business.setParseFields();
+                    business.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e != null) {
+                                Log.e("TAG", "Error while saving", e);
+                                Toast.makeText(getContext(), "Error while saving!", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            currUser.getRelation(User.KEY_LIST).add(business);
+                            currUser.saveInBackground();
+                            loadNextResult();
+                        }
+                    });
+                } // otherwise, save the existing business to the user
+                else {
+                    currUser.getRelation(User.KEY_LIST).add(objects.get(0));
                     currUser.saveInBackground();
                     loadNextResult();
                 }
@@ -296,7 +313,23 @@ public class SwipeFragment extends Fragment {
         // save the progress through this search
         currSearch.put(User.Search.KEY_SEARCH_INDEX, searchIndex);
         currSearch.saveInBackground();
-        // load the business
-        loadBusinessView(businesses.get(APIresultIndex));
+
+        // check if user has already saved the next result in their list
+        ParseQuery<ParseObject> listQuery = currUser.getRelation("list").getQuery();
+        listQuery.whereEqualTo(Business.KEY_ALIAS, businesses.get(APIresultIndex).getAlias());
+        listQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> matches, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, e.getMessage(), e);
+                    return;
+                }
+                if (matches.isEmpty()) {
+                    loadBusinessView(businesses.get(APIresultIndex));
+                } else {
+                    loadNextResult();
+                }
+            }
+        });
     }
 }
