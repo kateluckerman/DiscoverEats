@@ -243,7 +243,7 @@ public class SwipeFragment extends Fragment {
         binding.tvCategories.setText(business.getCategoryString());
         binding.tvLocation.setText(business.getLocation());
         binding.tvPrice.setText(business.getPrice());
-        final int resourceId = getContext().getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
+        final int resourceId = getActivity().getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
                 getContext().getPackageName());
         binding.ivRating.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId));
         Glide.with(getContext()).load(business.getPhotoURL()).into(binding.ivMainImage);
