@@ -173,7 +173,7 @@ public class SwipeFragment extends Fragment {
                     loadNextResult();
 
                     // set fork icon click to save business and load next
-                    binding.ivFork.setOnClickListener(new View.OnClickListener() {
+                    binding.ivHeart.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             saveAndLoadNext(businesses.get(APIresultIndex));
@@ -293,7 +293,7 @@ public class SwipeFragment extends Fragment {
         // if the next result is at the end of all of the results, display a message and reset buttons to continue displaying message
         if (searchIndex + 1 >= resultTotal) {
             Toast.makeText(getContext(), "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
-            binding.ivFork.setOnClickListener(new View.OnClickListener() {
+            binding.ivHeart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Toast.makeText(getContext(), "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
