@@ -12,4 +12,5 @@
     <string name="yelp_link">View on Yelp</string>
     <string name="add_name_hint">Click to add name</string>
     <string name="log_out_button">Log Out</string>
+    <string name="filter_menu_description">Filter</string>
 </resources>

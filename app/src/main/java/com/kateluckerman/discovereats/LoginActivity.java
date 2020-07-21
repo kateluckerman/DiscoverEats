@@ -5,6 +5,7 @@ import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final String TAG = "LoginActivity";
 
     private ActivityLoginBinding binding;
-    private boolean createAccount = false;
+    private boolean createAccountSelected = false;
 
 
     @Override
@@ -35,28 +36,18 @@ public class LoginActivity extends AppCompatActivity {
             goMainActivity();
         }
 
-        final TextView tvCreateAcc = binding.tvCreateAcc;
-        final TextView tvLogin = binding.tvLogin;
-
-        // when "Log In" is clicked, it becomes black, "Create Account" becomes gray, and confirm goes away
-        tvLogin.setOnClickListener(new View.OnClickListener() {
+        // click listeners to switch between log in/create account
+        binding.tvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createAccount = false;
-                tvLogin.setTextColor(Color.BLACK);
-                tvCreateAcc.setTextColor(getResources().getColor(R.color.unselected_text, getTheme()));
-                binding.etConfirmPass.setVisibility(View.GONE);
+                setLogInSelected();
             }
         });
 
-        // when "Create Account" is clicked, it becomes black, "Log In" becomes gray, and confirm shows up
-        tvCreateAcc.setOnClickListener(new View.OnClickListener() {
+        binding.tvCreateAcc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createAccount = true;
-                tvCreateAcc.setTextColor(Color.BLACK);
-                tvLogin.setTextColor(getResources().getColor(R.color.unselected_text, getTheme()));
-                binding.etConfirmPass.setVisibility(View.VISIBLE);
+                setCreateSelected();
             }
         });
 
@@ -74,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (createAccount) {
+                if (createAccountSelected) {
                     // check that password and confirm password are the same
                     if (!passConfirm.equals(password)) {
                         Toast.makeText(LoginActivity.this, "Password confirmation does not match password.", Toast.LENGTH_LONG).show();
@@ -92,6 +83,34 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void setLogInSelected() {
+        createAccountSelected  = false;
+        setSelected(binding.tvLogin);
+        setUnselected(binding.tvCreateAcc);
+        binding.etConfirmPass.setVisibility(View.GONE);
+        binding.btnLogin.setText(getString(R.string.login_button));
+    }
+
+    private void setCreateSelected() {
+        createAccountSelected = true;
+        setSelected(binding.tvCreateAcc);
+        setUnselected(binding.tvLogin);
+        binding.etConfirmPass.setVisibility(View.VISIBLE);
+        binding.btnLogin.setText(getString(R.string.create_button));
+    }
+
+    private void setSelected(TextView textView) {
+        textView.setTextColor(Color.BLACK);
+        textView.setTextSize(24);
+        textView.setTypeface(null, Typeface.BOLD);
+    }
+
+    private void setUnselected(TextView textView) {
+        textView.setTextColor(getResources().getColor(R.color.unselected_text, getTheme()));
+        textView.setTextSize(20);
+        textView.setTypeface(null, Typeface.NORMAL);
     }
 
     private void signUp(String username, String password) {
