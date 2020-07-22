@@ -22,7 +22,7 @@
             android:id="@+id/card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/cardview_default_elevation"
+            android:elevation="4dp"
             android:layout_above="@id/llButtons">
 
             <RelativeLayout
@@ -161,7 +161,7 @@
         <RelativeLayout
             android:id="@+id/llButtons"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="100dp"
             android:layout_alignParentBottom="true"
             android:background="#FFAB40"
             android:orientation="horizontal"

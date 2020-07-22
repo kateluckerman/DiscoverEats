@@ -13,6 +13,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="12dp"
             android:orientation="vertical">
@@ -60,6 +61,18 @@
                 tools:text="katelucky101" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/llNames"
+            android:layout_alignBottom="@+id/llNames"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/llNames"
+            android:gravity="center_horizontal|center_vertical"
+            android:visibility="gone"
+            android:text="@string/log_out_button" />
+
         <ImageView
             android:id="@+id/ivProfileImage"
             android:layout_width="wrap_content"
@@ -74,25 +87,68 @@
             android:background="#FFFFFF"
             tools:src="@tools:sample/avatars" />
 
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/settings_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp"/>
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/llNames"
+            android:layout_below="@id/llButtons">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvList"
-            android:layout_width="381dp"
-            android:layout_height="393dp"
-            android:layout_below="@+id/llNames"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentEnd="true" />
 
-        <TextView
-            android:id="@+id/tvLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/llNames"
-            android:layout_alignBottom="@+id/llNames"
-            android:layout_alignParentEnd="true"
-            android:layout_toEndOf="@+id/llNames"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/log_out_button" />
+        </androidx.cardview.widget.CardView>
+
+        <RelativeLayout
+            android:id="@+id/llButtons"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentTop="true"
+            android:background="#FFAB40"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/ivSwipe"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="6dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/small_button_circle"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/swipe_icon" />
+
+            <ImageView
+                android:id="@+id/ivSearch"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="12dp"
+                android:background="@drawable/button_circle"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="24dp"
+                android:src="@drawable/search_icon" />
+
+            <ImageView
+                android:id="@+id/ivFriends"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/button_circle"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="24dp"
+                android:src="@drawable/friends_icon" />
+        </RelativeLayout>
 
     </RelativeLayout>
 </layout>
