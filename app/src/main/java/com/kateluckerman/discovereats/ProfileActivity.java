@@ -1,19 +1,15 @@
 package com.kateluckerman.discovereats;
 
-import android.content.Intent;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
-import com.kateluckerman.discovereats.databinding.FragmentProfileBinding;
+import com.kateluckerman.discovereats.databinding.ActivityProfileBinding;
 import com.kateluckerman.discovereats.models.Business;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
@@ -24,32 +20,29 @@ import com.parse.ParseUser;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfileFragment extends Fragment {
+public class ProfileActivity extends AppCompatActivity {
 
     public static final String TAG = "ProfileFragment";
 
     private ListAdapter adapter;
     private List<Business> allBusinesses;
     private User user;
-    private FragmentProfileBinding binding;
-
-
-    public ProfileFragment() {
-        // Required empty public constructor
-    }
+    private ActivityProfileBinding binding;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        binding = FragmentProfileBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
-        return view;
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_profile);
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        binding.ivSwipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ProfileActivity.this, SwipeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         user = new User(ParseUser.getCurrentUser());
 
         // set name in view if user has one, otherwise switch out TextView with EditText to add a name
@@ -80,16 +73,16 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 ParseUser.logOut();
-                Intent intent = new Intent(getContext(), LoginActivity.class);
+                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
                 startActivity(intent);
-                getActivity().finish();
+                finish();
             }
         });
 
         // set up RecyclerView with adapter, layout manager, and empty business list
-        adapter = new ListAdapter(getContext(), allBusinesses);
+        adapter = new ListAdapter(this, allBusinesses);
         binding.rvList.setAdapter(adapter);
-        binding.rvList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvList.setLayoutManager(new LinearLayoutManager(this));
 
         // get the user's saved business list
         ParseRelation<Business> list = user.getUser().getRelation(User.KEY_LIST);

@@ -1,22 +1,19 @@
 package com.kateluckerman.discovereats;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
+import android.provider.ContactsContract;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -24,7 +21,7 @@ import com.codepath.asynchttpclient.AsyncHttpClient;
 import com.codepath.asynchttpclient.RequestHeaders;
 import com.codepath.asynchttpclient.RequestParams;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
-import com.kateluckerman.discovereats.databinding.FragmentSwipeBinding;
+import com.kateluckerman.discovereats.databinding.ActivitySwipeBinding;
 import com.kateluckerman.discovereats.models.Business;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
@@ -43,12 +40,12 @@ import java.util.List;
 
 import okhttp3.Headers;
 
-public class SwipeFragment extends Fragment {
+public class SwipeActivity extends AppCompatActivity {
 
     public static final String YELP_SEARCH_ENDPOINT = "https://api.yelp.com/v3/businesses/search";
     public static final String TAG = "SwipeFragment";
 
-    private FragmentSwipeBinding binding;
+    private ActivitySwipeBinding binding;
 
     public static final int INITIAL_INDEX = -1;
     List<Business> businesses;
@@ -70,31 +67,27 @@ public class SwipeFragment extends Fragment {
     ParseObject currSearch;
     String location;
 
-    public SwipeFragment() {
-        // Required empty public constructor
-    }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment and apply ViewBinding
-        binding = FragmentSwipeBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_swipe);
 
         final GestureDetector gestureDetector = setUpSwiping();
-        view.setOnTouchListener(new View.OnTouchListener() {
+        binding.getRoot().setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return gestureDetector.onTouchEvent(event);
             }
         });
 
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        binding.ivProfileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SwipeActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
@@ -146,7 +139,7 @@ public class SwipeFragment extends Fragment {
         params.put("location", location);
         params.put("categories", "restaurants");
         RequestHeaders requestHeaders = new RequestHeaders();
-        requestHeaders.put("Authorization", "Bearer " + getContext().getString(R.string.yelp_api_key));
+        requestHeaders.put("Authorization", "Bearer " + getString(R.string.yelp_api_key));
         // tell API to only load results after the index of the last one seen
         params.put("offset", searchIndex + 1);
 
@@ -200,7 +193,7 @@ public class SwipeFragment extends Fragment {
     }
 
     private GestureDetector setUpSwiping() {
-        final GestureDetector gesture = new GestureDetector(getActivity(),
+        final GestureDetector gesture = new GestureDetector(this,
                 new GestureDetector.SimpleOnGestureListener() {
 
                     @Override
@@ -243,10 +236,10 @@ public class SwipeFragment extends Fragment {
         binding.tvCategories.setText(business.getCategoryString());
         binding.tvLocation.setText(business.getLocation());
         binding.tvPrice.setText(business.getPrice());
-        final int resourceId = getActivity().getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
-                getContext().getPackageName());
-        binding.ivRating.setImageDrawable(ContextCompat.getDrawable(getContext(), resourceId));
-        Glide.with(getContext()).load(business.getPhotoURL()).into(binding.ivMainImage);
+        final int resourceId = getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
+                getPackageName());
+        binding.ivRating.setImageDrawable(ContextCompat.getDrawable(this, resourceId));
+        Glide.with(this).load(business.getPhotoURL()).into(binding.ivMainImage);
         // Create "view on Yelp" link and set the textview to respond to link clicks
         Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");
         binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
@@ -271,7 +264,7 @@ public class SwipeFragment extends Fragment {
                         public void done(ParseException e) {
                             if (e != null) {
                                 Log.e("TAG", "Error while saving", e);
-                                Toast.makeText(getContext(), "Error while saving!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SwipeActivity.this, "Error while saving!", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             currUser.getRelation(User.KEY_LIST).add(business);
@@ -292,11 +285,11 @@ public class SwipeFragment extends Fragment {
     private void loadNextResult() {
         // if the next result is at the end of all of the results, display a message and reset buttons to continue displaying message
         if (searchIndex + 1 >= resultTotal) {
-            Toast.makeText(getContext(), "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
             binding.ivHeart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(getContext(), "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SwipeActivity.this, "You have reached the end of results for this location", Toast.LENGTH_LONG).show();
                 }
             });
             return;

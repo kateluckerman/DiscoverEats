@@ -16,6 +16,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
+            android:scaleType="centerCrop"
             tools:srcCompat="@tools:sample/avatars" />
 
         <TextView
@@ -34,34 +35,34 @@
             android:id="@+id/ivCategoryIcon"
             android:layout_width="20dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:layout_alignStart="@+id/tvName"
             android:layout_alignTop="@id/tvCategory"
             android:layout_alignBottom="@id/tvCategory"
-            android:tint="@color/colorPrimaryDark"
-            android:src="@drawable/fork_icon" />
+            android:layout_marginStart="4dp"
+            android:src="@drawable/fork_icon"
+            android:tint="@color/colorPrimaryDark" />
 
         <TextView
             android:id="@+id/tvCategory"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/tvName"
-            android:layout_toEndOf="@id/ivCategoryIcon"
             android:layout_alignEnd="@+id/tvName"
-            android:layout_marginTop="4dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@id/ivCategoryIcon"
             tools:text="American, Fast" />
 
         <ImageView
             android:id="@+id/ivLocationIcon"
             android:layout_width="20dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:layout_alignStart="@+id/tvName"
             android:layout_alignTop="@id/tvLocation"
             android:layout_alignBottom="@id/tvLocation"
-            android:tint="@color/colorPrimaryDark"
-            android:src="@drawable/location_icon" />
+            android:layout_marginStart="4dp"
+            android:src="@drawable/location_icon"
+            android:tint="@color/colorPrimaryDark" />
 
         <TextView
             android:id="@+id/tvLocation"
@@ -113,9 +114,9 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/unselected_text"
+            android:layout_below="@id/tvLocation"
             android:layout_marginTop="8dp"
-            android:layout_below="@id/tvLocation" />
+            android:background="@color/unselected_text" />
 
     </RelativeLayout>
 </layout>

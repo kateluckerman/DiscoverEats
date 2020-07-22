@@ -5,8 +5,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ProfileFragment">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/llNames"
@@ -102,12 +101,12 @@
             android:layout_above="@+id/llNames"
             android:layout_below="@id/llButtons">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true" />
 
         </androidx.cardview.widget.CardView>
 
