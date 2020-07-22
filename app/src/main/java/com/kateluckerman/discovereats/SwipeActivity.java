@@ -4,9 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -50,52 +50,28 @@ public class SwipeActivity extends AppCompatActivity {
     public static final int INITIAL_INDEX = -1;
     List<Business> businesses;
 
-    // for each combination of search queries, the Yelp API can access up to 1000 results in increments of up to 50
-    // for some searches, the total is lower than 1000, so we have to store the total to prevent swiping past the results
-    private int resultTotal;
-
-    // stores the index of user's last seen result out of total results of this search query
-    private int searchIndex;
-
-    // stores the index of user's last seen result out of results of the most recent API call
-    private int APIresultIndex;
-
-    // dictates how many results the API gets with each call - max allowed is 50
-    public static final int LIMIT = 5;
-
     ParseUser currUser;
     ParseObject currSearch;
     String location;
+
+    // for each combination of search queries, the Yelp API can access up to 1000 results in increments of up to 50
+    // for some searches, the total is lower than 1000, so we have to store the total to prevent swiping past the results
+    private int resultTotal;
+    // stores the index of user's last seen result out of total results of this search query
+    private int searchIndex;
+    // stores the index of user's last seen result out of results of the most recent API call
+    private int APIresultIndex;
+    // dictates how many results the API gets with each call - max allowed is 50
+    public static final int LIMIT = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_swipe);
 
-        final GestureDetector gestureDetector = setUpSwiping();
-        binding.getRoot().setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        });
-
-        binding.ivProfileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SwipeActivity.this, ProfileActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SwipeActivity.this, FilterActivity.class);
-                startActivity(intent);
-            }
-        });
+        setSwipeOnCard();
+        setProfileButton();
+        setFilterButton();
 
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
@@ -111,32 +87,40 @@ public class SwipeActivity extends AppCompatActivity {
                 }
                 // if no matching search is found
                 if (objects.isEmpty()) {
-                    // create a new search with these parameters
-                    currSearch = new ParseObject(User.Search.CLASS_NAME);
-                    currSearch.put(User.Search.KEY_LOCATION, location);
-                    currSearch.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            // add the new search to the current user
-                            currUser.getRelation(User.KEY_SEARCHES).add(currSearch);
-                            currUser.saveInBackground();
-                        }
-                    });
-                    // no results for this search have been seen yet, so set index to initial value
-                    searchIndex = INITIAL_INDEX;
+                    createNewSearch();
                 } else {
-                    // save the Parse search locally so the user's progress can be updated
-                    currSearch = objects.get(0);
-                    // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
-                    if (objects.get(0).getNumber(User.Search.KEY_SEARCH_INDEX) != null) {
-                        searchIndex = (int) objects.get(0).getNumber("searchIndex") - 1;
-                    } else {
-                        searchIndex = INITIAL_INDEX;
-                    }
+                    resumeSearch(objects.get(0));
                 }
                 getYelpResults();
             }
         });
+    }
+
+    private void createNewSearch() {
+        currSearch = new ParseObject(User.Search.CLASS_NAME);
+        currSearch.put(User.Search.KEY_LOCATION, location);
+        currSearch.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                // add the new search to the current user
+                currUser.getRelation(User.KEY_SEARCHES).add(currSearch);
+                currUser.saveInBackground();
+            }
+        });
+        // no results for this search have been seen yet, so set index to initial value
+        searchIndex = INITIAL_INDEX;
+    }
+
+    private void resumeSearch(ParseObject object) {
+        // save the Parse search locally so the user's progress can be updated
+        currSearch = object;
+        // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
+        Number storedIndex = currSearch.getNumber(User.Search.KEY_SEARCH_INDEX);
+        if (storedIndex != null) {
+            searchIndex = (int) storedIndex - 1;
+        } else {
+            searchIndex = INITIAL_INDEX;
+        }
     }
 
     public void getYelpResults() {
@@ -200,7 +184,20 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
-    private GestureDetector setUpSwiping() {
+    // chose to suppress accessibility warning because buttons can also be used instead of swiping
+    @SuppressLint("ClickableViewAccessibility")
+    private void setSwipeOnCard() {
+        final GestureDetector gestureDetector = setSwipeDetector();
+
+        binding.card.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        });
+    }
+
+    private GestureDetector setSwipeDetector() {
         final GestureDetector gesture = new GestureDetector(this,
                 new GestureDetector.SimpleOnGestureListener() {
 
@@ -239,6 +236,27 @@ public class SwipeActivity extends AppCompatActivity {
         return gesture;
     }
 
+    private void setProfileButton() {
+        binding.ivProfileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SwipeActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    private void setFilterButton() {
+        binding.btnFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SwipeActivity.this, FilterActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
     private void loadBusinessView(Business business) {
         binding.tvName.setText(business.getName());
         binding.tvCategories.setText(business.getCategoryString());
@@ -248,10 +266,10 @@ public class SwipeActivity extends AppCompatActivity {
                 getPackageName());
         binding.ivRating.setImageDrawable(ContextCompat.getDrawable(this, resourceId));
         Glide.with(this).load(business.getPhotoURL()).into(binding.ivMainImage);
-        // Create "view on Yelp" link and set the textview to respond to link clicks
-        Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");
-        binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
-        binding.tvWebsite.setText(html);
+//        // Create "view on Yelp" link and set the textview to respond to link clicks
+//        Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");
+//        binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
+//        binding.tvWebsite.setText(html);
     }
 
     private void saveAndLoadNext(final Business business) {

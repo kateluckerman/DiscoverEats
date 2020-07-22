@@ -34,50 +34,15 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_profile);
 
-        binding.ivSwipe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ProfileActivity.this, SwipeActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+        setSwipeButton();
 
         user = new User(ParseUser.getCurrentUser());
 
-        // set name in view if user has one, otherwise switch out TextView with EditText to add a name
-        if (ParseUser.getCurrentUser().getString(User.KEY_NAME) != null) {
+        // set name and username in view and initialize business array
+        if (user.getName() != null)
             binding.tvName.setText(user.getName());
-        } else {
-            binding.tvName.setVisibility(View.GONE);
-            binding.llEditName.setVisibility(View.VISIBLE);
-
-            binding.btnSaveName.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String name = binding.etName.getText().toString();
-                    user.setName(name);
-                    binding.tvName.setText(name);
-                    binding.llEditName.setVisibility(View.GONE);
-                    binding.tvName.setVisibility(View.VISIBLE);
-                }
-            });
-        }
-
-        // set username in view and initialize business array
         binding.tvUsername.setText(user.getUsername());
         allBusinesses = new ArrayList<>();
-
-        // on "Log Out" click, loads login screen and finished current activity
-        binding.tvLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ParseUser.logOut();
-                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
 
         // set up RecyclerView with adapter, layout manager, and empty business list
         adapter = new ListAdapter(this, allBusinesses);
@@ -98,6 +63,16 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    private void setSwipeButton() {
+        binding.ivSwipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ProfileActivity.this, SwipeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 }

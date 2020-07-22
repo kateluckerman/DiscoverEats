@@ -8,7 +8,7 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
+            android:id="@+id/btnFilter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/filter_menu_icon"
@@ -53,18 +53,6 @@
                     android:layout_toStartOf="@id/ivRating"
                     android:textSize="30sp"
                     tools:text="Restaurant Name" />
-
-                <TextView
-                    android:id="@+id/tvWebsite"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_above="@id/horizontalLine"
-                    android:layout_alignStart="@+id/tvName"
-                    android:layout_marginBottom="8dp"
-                    android:layout_toEndOf="@id/tvName"
-                    android:visibility="gone"
-                    android:textSize="18sp"
-                    tools:text="website-of-restaurant.com" />
 
                 <ImageView
                     android:id="@+id/ivLocationIcon"

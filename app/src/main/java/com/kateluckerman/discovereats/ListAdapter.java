@@ -63,10 +63,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                     context.getPackageName());
             binding.ivRating.setImageDrawable(ContextCompat.getDrawable(context, resourceId));
             Glide.with(context).load(business.getPhotoURL()).into(binding.ivMainImage);
-            // Create "view on Yelp" link and set the textview to respond to link clicks
-            Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + context.getString(R.string.yelp_link) + "</a>");
-            binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
-            binding.tvWebsite.setText(html);
+//            // Create "view on Yelp" link and set the textview to respond to link clicks
+//            Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + context.getString(R.string.yelp_link) + "</a>");
+//            binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
+//            binding.tvWebsite.setText(html);
         }
     }
 }
