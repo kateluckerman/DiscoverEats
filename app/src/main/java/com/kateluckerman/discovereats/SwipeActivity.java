@@ -1,5 +1,6 @@
 package com.kateluckerman.discovereats;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
@@ -44,6 +45,7 @@ public class SwipeActivity extends AppCompatActivity {
 
     public static final String YELP_SEARCH_ENDPOINT = "https://api.yelp.com/v3/businesses/search";
     public static final String TAG = "SwipeFragment";
+    public static final int FILTER_REQUEST_CODE = 1;
 
     private ActivitySwipeBinding binding;
 
@@ -74,8 +76,14 @@ public class SwipeActivity extends AppCompatActivity {
         setFilterButton();
 
         currUser = ParseUser.getCurrentUser();
+
+        getResults();
+    }
+
+    private void getResults() {
         businesses = new ArrayList<>();
-        location = "Chesterfield, mo"; // this is a placeholder location to be changed based on user later
+        if (location == null)
+            location = "Chesterfield, MO"; // this is a placeholder location to be changed based on user later
 
         // check if the user already has a search with the same location
         currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).findInBackground(new FindCallback<ParseObject>() {
@@ -252,9 +260,25 @@ public class SwipeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(SwipeActivity.this, FilterActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, FILTER_REQUEST_CODE);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILTER_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String locationString = data.getStringExtra("locationString");
+                if (!locationString.isEmpty()) {
+                    location = locationString;
+                    Log.i(TAG, "filter result" + location);
+                    getResults();
+                }
+            }
+        }
     }
 
     private void loadBusinessView(Business business) {
