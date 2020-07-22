@@ -89,6 +89,14 @@ public class SwipeActivity extends AppCompatActivity {
             }
         });
 
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SwipeActivity.this, FilterActivity.class);
+                startActivity(intent);
+            }
+        });
+
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
         location = "Chesterfield, mo"; // this is a placeholder location to be changed based on user later

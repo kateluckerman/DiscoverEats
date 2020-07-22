@@ -13,4 +13,11 @@
     <string name="add_name_hint">Click to add name</string>
     <string name="log_out_button">Log Out</string>
     <string name="filter_menu_description">Filter</string>
+
+    <string name="location_hint">Enter a city or postal code</string>
+    <string name="or">or</string>
+    <string name="location_button">Use current location</string>
+    <string name="location">Location</string>
+    <string name="apply_button">Apply</string>
+
 </resources>
