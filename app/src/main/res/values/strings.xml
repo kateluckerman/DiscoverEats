@@ -20,4 +20,6 @@
     <string name="location">Location</string>
     <string name="apply_button">Apply</string>
 
+    <string name="edit_profile">Edit Profile</string>
+
 </resources>

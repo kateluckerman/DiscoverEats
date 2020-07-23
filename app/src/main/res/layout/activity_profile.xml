@@ -27,6 +27,17 @@
                 android:layout_gravity="center_horizontal"
                 tools:text="Kate Lucky" />
 
+            <EditText
+                android:id="@+id/etEditName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:textSize="24sp"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"
+                android:hint="@string/add_name_hint" />
+
             <TextView
                 android:id="@+id/tvUsername"
                 android:layout_width="wrap_content"
@@ -50,7 +61,18 @@
             android:background="#FFFFFF"
             tools:src="@tools:sample/avatars" />
 
+        <Button
+            android:id="@+id/btnDoneEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp"
+            android:visibility="gone"
+            android:text="@string/apply_button" />
+
         <ImageView
+            android:id="@+id/ivSettings"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/settings_icon"
@@ -81,7 +103,10 @@
             android:layout_alignParentTop="true"
             android:background="#FFAB40"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:paddingTop="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="4dp">
 
             <ImageView
                 android:id="@+id/ivSwipe"
@@ -90,8 +115,18 @@
                 android:padding="6dp"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/small_button_circle"
-                android:layout_alignParentTop="true"
+                android:layout_below="@id/ivUp"
                 android:src="@drawable/swipe_icon" />
+
+            <ImageView
+                android:id="@+id/ivUp"
+                android:layout_width="48dp"
+                android:layout_height="16dp"
+                android:scaleType="fitXY"
+                android:layout_alignStart="@id/ivSwipe"
+                android:layout_alignEnd="@id/ivSwipe"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/white_up_arrow" />
 
             <ImageView
                 android:id="@+id/ivSearch"

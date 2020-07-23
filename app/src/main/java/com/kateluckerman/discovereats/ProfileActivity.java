@@ -4,10 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import com.kateluckerman.discovereats.databinding.ActivityProfileBinding;
 import com.kateluckerman.discovereats.models.Business;
@@ -35,12 +41,12 @@ public class ProfileActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_profile);
 
         setSwipeButton();
+        setSettingsMenu();
 
         user = new User(ParseUser.getCurrentUser());
 
         // set name and username in view and initialize business array
-        if (user.getName() != null)
-            binding.tvName.setText(user.getName());
+        setName(binding.tvName);
         binding.tvUsername.setText(user.getUsername());
         allBusinesses = new ArrayList<>();
 
@@ -75,4 +81,87 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void setName(TextView textView) {
+        if (user.getName() != null)
+            textView.setText(user.getName());
+    }
+
+    private void setSettingsMenu() {
+        binding.ivSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popup = new PopupMenu(ProfileActivity.this, view);
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.menu_settings, popup.getMenu());
+                popup.setOnMenuItemClickListener(new SettingsMenuClickListener());
+                popup.show();
+            }
+        });
+    }
+
+    public class SettingsMenuClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.action_edit_profile: {
+                    turnOnEdit();
+                    break;
+                }
+                case R.id.action_logout: {
+                    user.getUser().logOut();
+                    Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                    break;
+                }
+            }
+            return true;
+        }
+
+        private void turnOnEdit() {
+            makeGone(binding.tvName);
+            makeGone(binding.ivSettings);
+
+            makeVisible(binding.etEditName);
+            makeVisible(binding.btnDoneEdit);
+
+            setName(binding.etEditName);
+
+            binding.btnDoneEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    user.setName(binding.etEditName.getText().toString());
+                    user.getUser().saveInBackground();
+
+                    turnOffEdit();
+                }
+            });
+        }
+
+        private void turnOffEdit() {
+            makeGone(binding.etEditName);
+            makeGone(binding.btnDoneEdit);
+
+            makeVisible(binding.ivSettings);
+            makeVisible(binding.tvName);
+
+            setName(binding.tvName);
+
+            // make the keyboard go away
+            InputMethodManager inputManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(binding.etEditName.getWindowToken(), 0);
+        }
+
+        private void makeVisible(View view) {
+            view.setVisibility(View.VISIBLE);
+        }
+
+        private void makeGone(View view) {
+            view.setVisibility(View.GONE);
+        }
+    }
+
+
 }
