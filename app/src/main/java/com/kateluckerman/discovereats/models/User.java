@@ -3,6 +3,8 @@ package com.kateluckerman.discovereats.models;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 
+import java.io.File;
+
 public class User {
 
     public static final String KEY_NAME = "name";
@@ -41,6 +43,10 @@ public class User {
 
     public ParseFile getProfileImage() {
         return user.getParseFile(KEY_PROFILE_IMAGE);
+    }
+
+    public void setProfileImage(File photoFile) {
+        user.put(KEY_PROFILE_IMAGE, new ParseFile(photoFile));
     }
 
     public void addToList(Business business) {
