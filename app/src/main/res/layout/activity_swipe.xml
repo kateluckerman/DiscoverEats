@@ -152,7 +152,10 @@
             android:layout_alignParentBottom="true"
             android:background="#FFAB40"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:paddingTop="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="4dp">
 
             <ImageView
                 android:id="@+id/ivProfileButton"
@@ -160,8 +163,19 @@
                 android:layout_height="48dp"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/small_button_circle"
-                android:layout_alignParentBottom="true"
+                android:layout_above="@id/ivDown"
                 android:src="@drawable/profile_icon" />
+
+            <ImageView
+                android:id="@+id/ivDown"
+                android:layout_width="48dp"
+                android:layout_height="16dp"
+                android:scaleType="fitXY"
+                android:layout_alignStart="@id/ivProfileButton"
+                android:layout_alignEnd="@id/ivProfileButton"
+                android:layout_alignParentBottom="true"
+                android:src="@drawable/white_down_arrow" />
+
 
             <ImageView
                 android:id="@+id/ivX"

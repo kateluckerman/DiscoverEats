@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
@@ -35,6 +36,7 @@ import com.parse.SaveCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +56,9 @@ public class SwipeActivity extends AppCompatActivity {
 
     ParseUser currUser;
     ParseObject currSearch;
-    String location;
+    String locationString;
+    Location currentLocation;
+    boolean usingCurrentLocation = false;
 
     // for each combination of search queries, the Yelp API can access up to 1000 results in increments of up to 50
     // for some searches, the total is lower than 1000, so we have to store the total to prevent swiping past the results
@@ -82,31 +86,36 @@ public class SwipeActivity extends AppCompatActivity {
 
     private void getResults() {
         businesses = new ArrayList<>();
-        if (location == null)
-            location = "Chesterfield, MO"; // this is a placeholder location to be changed based on user later
 
-        // check if the user already has a search with the same location
-        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e != null) {
-                    Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
-                    return;
+        if (locationString == null && !usingCurrentLocation)
+            locationString = "Bay Area"; // TODO: decide to either set a default location or load a different page before location is given
+
+        if (!usingCurrentLocation) {
+            // check if the user already has a search with the same location string
+            currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, locationString).findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e != null) {
+                        Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
+                        return;
+                    }
+                    // if no matching search is found
+                    if (objects.isEmpty()) {
+                        createNewSearch();
+                    } else {
+                        resumeSearch(objects.get(0));
+                    }
+                    getYelpResults();
                 }
-                // if no matching search is found
-                if (objects.isEmpty()) {
-                    createNewSearch();
-                } else {
-                    resumeSearch(objects.get(0));
-                }
-                getYelpResults();
-            }
-        });
+            });
+        } else {
+            getYelpResults();
+        }
     }
 
     private void createNewSearch() {
         currSearch = new ParseObject(User.Search.CLASS_NAME);
-        currSearch.put(User.Search.KEY_LOCATION, location);
+        currSearch.put(User.Search.KEY_LOCATION, locationString);
         currSearch.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -136,7 +145,13 @@ public class SwipeActivity extends AppCompatActivity {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("limit", LIMIT);
-        params.put("location", location);
+        if (usingCurrentLocation) {
+            // TODO: Codepath's HTTP client won't let me put doubles so I'm going to need to change a real one
+            params.put("longitude", (int) currentLocation.getLongitude());
+            params.put("latitude", (int) currentLocation.getLatitude());
+        } else {
+            params.put("location", locationString);
+        }
         params.put("categories", "restaurants");
         RequestHeaders requestHeaders = new RequestHeaders();
         requestHeaders.put("Authorization", "Bearer " + getString(R.string.yelp_api_key));
@@ -273,10 +288,17 @@ public class SwipeActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 String locationString = data.getStringExtra("locationString");
                 if (!locationString.isEmpty()) {
-                    location = locationString;
-                    Log.i(TAG, "filter result" + location);
-                    getResults();
+                    this.locationString = locationString;
+                    Log.i(TAG, "filter result" + locationString);
+                    usingCurrentLocation = false;
                 }
+                Location currentLocation = Parcels.unwrap(data.getParcelableExtra("currentLocation"));
+                if (currentLocation != null) {
+                    usingCurrentLocation = true;
+                    this.currentLocation = currentLocation;
+                    Log.i(TAG, "current location is not null");
+                }
+                getResults();
             }
         }
     }
@@ -354,8 +376,10 @@ public class SwipeActivity extends AppCompatActivity {
         APIresultIndex++;
         searchIndex++;
         // save the progress through this search
-        currSearch.put(User.Search.KEY_SEARCH_INDEX, searchIndex);
-        currSearch.saveInBackground();
+        if (!usingCurrentLocation) {
+            currSearch.put(User.Search.KEY_SEARCH_INDEX, searchIndex);
+            currSearch.saveInBackground();
+        }
 
         // check if user has already saved the next result in their list
         ParseQuery<ParseObject> listQuery = currUser.getRelation("list").getQuery();
