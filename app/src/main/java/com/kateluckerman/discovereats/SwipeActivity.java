@@ -27,6 +27,7 @@ import com.kateluckerman.discovereats.databinding.ActivitySwipeBinding;
 import com.kateluckerman.discovereats.models.Business;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -80,38 +81,46 @@ public class SwipeActivity extends AppCompatActivity {
         setFilterButton();
 
         currUser = ParseUser.getCurrentUser();
-
-        getResults();
-    }
-
-    private void getResults() {
         businesses = new ArrayList<>();
 
-        if (locationString == null && !usingCurrentLocation)
-            locationString = "Bay Area"; // TODO: decide to either set a default location or load a different page before location is given
-
-        if (!usingCurrentLocation) {
-            // check if the user already has a search with the same location string
-            currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, locationString).findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> objects, ParseException e) {
-                    if (e != null) {
-                        Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
-                        return;
-                    }
-                    // if no matching search is found
-                    if (objects.isEmpty()) {
-                        createNewSearch();
-                    } else {
-                        resumeSearch(objects.get(0));
-                    }
-                    getYelpResults();
+        // initialize startup search to be user's most recent search or default
+        ParseQuery<ParseObject> recentSearchQuery = currUser.getRelation(User.KEY_SEARCHES).getQuery().orderByDescending(ParseUser.KEY_UPDATED_AT);
+        recentSearchQuery.setLimit(1).findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                // user has no search queries
+                if (objects.isEmpty()) {
+                    // set location as default
+                    locationString = "Bay Area";
+                    createNewSearch();
+                } else {
+                    resumeSearch(objects.get(0));
                 }
-            });
-        } else {
-            getYelpResults();
-        }
+                getYelpResults();
+            }
+        });
     }
+
+    private void setSearch() {
+        // check if the user already has a search with the same location string
+        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, locationString).setLimit(1).findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
+                    return;
+                }
+                // if no matching search is found
+                if (objects.isEmpty()) {
+                    createNewSearch();
+                } else {
+                    resumeSearch(objects.get(0));
+                }
+                getYelpResults();
+            }
+        });
+    }
+
 
     private void createNewSearch() {
         currSearch = new ParseObject(User.Search.CLASS_NAME);
@@ -131,6 +140,7 @@ public class SwipeActivity extends AppCompatActivity {
     private void resumeSearch(ParseObject object) {
         // save the Parse search locally so the user's progress can be updated
         currSearch = object;
+        locationString = currSearch.getString(User.Search.KEY_LOCATION);
         // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
         Number storedIndex = currSearch.getNumber(User.Search.KEY_SEARCH_INDEX);
         if (storedIndex != null) {
@@ -291,14 +301,16 @@ public class SwipeActivity extends AppCompatActivity {
                     this.locationString = locationString;
                     Log.i(TAG, "filter result" + locationString);
                     usingCurrentLocation = false;
+                    setSearch();
                 }
                 Location currentLocation = Parcels.unwrap(data.getParcelableExtra("currentLocation"));
                 if (currentLocation != null) {
                     usingCurrentLocation = true;
                     this.currentLocation = currentLocation;
                     Log.i(TAG, "current location is not null");
+                    getYelpResults();
                 }
-                getResults();
+
             }
         }
     }

@@ -22,6 +22,6 @@
 
     <string name="edit_profile">Edit Profile</string>
     <string name="camera_pic">Open Camera</string>
-    <string name="gallery_pic">Cboose from Gallery</string>
+    <string name="gallery_pic">Choose from Gallery</string>
 
 </resources>
