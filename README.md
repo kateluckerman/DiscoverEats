@@ -6,6 +6,7 @@
 1. [Product Spec](#Product-Spec)
 1. [Wireframes](#Wireframes)
 2. [Schema](#Schema)
+2. [Demos](#Demos)
 
 ## Overview
 ### Description
@@ -123,3 +124,13 @@ Users can swipe through restaurants in an area, adding ones they like to their l
    HTTP Verb | Endpoint | Description
    ----------|----------|------------
     `GET`    | /businesses/search | get list of businesses based on location
+    
+   
+## Demos
+
+### MVP Walkthrough GIF
+
+Here's a walkthrough of the main features of the minimum viable product with required user stories implemented:
+
+<img src='https://github.com/kateluckerman/DiscoverEats/blob/master/mvp_walkthrough.gif' title='Video Walkthrough' width='400dp' alt='Video Walkthrough' />
+
