@@ -7,7 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -32,9 +35,9 @@ import com.parse.ParseRelation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,10 +51,10 @@ public class ProfileActivity extends AppCompatActivity {
     private ActivityProfileBinding binding;
 
     private File profilePhotoFile;
-
     public static final String photoFileName = "photo.jpg";
 
     public static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 42;
+    public final static int GALLERY_PICK_CODE = 1046;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,7 +129,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public class SettingsMenuClickListener implements PopupMenu.OnMenuItemClickListener {
-
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
@@ -155,16 +157,22 @@ public class ProfileActivity extends AppCompatActivity {
 
             setName(binding.etEditName);
 
+            // option to edit profile image when clicked
             binding.ivProfileImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    launchCamera();
+                    PopupMenu popup = new PopupMenu(ProfileActivity.this, view);
+                    MenuInflater inflater = popup.getMenuInflater();
+                    inflater.inflate(R.menu.menu_profile_image, popup.getMenu());
+                    popup.setOnMenuItemClickListener(new ImageMenuClickListener());
+                    popup.show();
                 }
             });
 
             binding.btnDoneEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    // save inputted name
                     user.setName(binding.etEditName.getText().toString());
                     user.getUser().saveInBackground();
 
@@ -172,6 +180,7 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
         }
+
 
         private void turnOffEdit() {
             makeGone(binding.etEditName);
@@ -194,6 +203,24 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
+    public class ImageMenuClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.action_camera: {
+                    launchCamera();
+                    break;
+                }
+                case R.id.action_gallery: {
+                    launchGallery(binding.getRoot());
+                    break;
+                }
+            }
+            return true;
+        }
+    }
+
     private void makeVisible(View view) {
         view.setVisibility(View.VISIBLE);
     }
@@ -209,6 +236,7 @@ public class ProfileActivity extends AppCompatActivity {
         Uri fileProvider = FileProvider.getUriForFile(this, "com.kateluckerman.fileprovider", profilePhotoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
+        // make sure that the activity can be resolved in another app
         if (intent.resolveActivity(this.getPackageManager()) != null) {
             startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
         }
@@ -218,29 +246,52 @@ public class ProfileActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                if (profilePhotoFile != null) {
-                    user.setProfileImage(profilePhotoFile);
-                    user.getUser().saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e != null) {
-                                Log.e(TAG, "Issue saving profile image", e);
-                            }
-                            setProfileImage();
-                        }
-                    });
-                }
-            } else { // Result was a failure
+            if (resultCode != RESULT_OK) {
                 Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+                return;
             }
+            if (profilePhotoFile == null) {
+                Log.e(TAG, "Photo not found");
+                return;
+            }
+
+            saveProfileImage(new ParseFile(profilePhotoFile));
+        }
+
+        if ((data != null) && requestCode == GALLERY_PICK_CODE) {
+            Uri photoUri = data.getData();
+
+            // Load the image located at photoUri into selectedImage
+            Bitmap selectedImage = loadFromUri(photoUri);
+
+            // convert to ParseFile
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            selectedImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] imageByte = byteArrayOutputStream.toByteArray();
+            ParseFile parseFile = new ParseFile("image_file.png", imageByte);
+
+            saveProfileImage(parseFile);
         }
     }
 
+    private void saveProfileImage(ParseFile parseFile) {
+        // save the photo to user
+        user.setProfileImage(parseFile);
+        user.getUser().saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Issue saving profile image", e);
+                    return;
+                }
+                // set the profile photo in view
+                setProfileImage();
+            }
+        });
+    }
+
     public File getPhotoFileUri(String fileName) {
-        // Get safe storage directory for photos
-        // Use `getExternalFilesDir` on Context to access package-specific directories.
-        // This way, we don't need to request external read/write runtime permissions.
+        // Get safe storage directory for photos without requesting permissions
         File mediaStorageDir = new File(this.getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
 
         // Create the storage directory if it does not exist
@@ -250,6 +301,34 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Return the file target for the photo based on filename
         return new File(mediaStorageDir.getPath() + File.separator + fileName);
+    }
+
+    public void launchGallery(View view) {
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        // make sure that the activity can be resolved in another app
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, GALLERY_PICK_CODE);
+        }
+    }
+
+    public Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if (Build.VERSION.SDK_INT > 27) {
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(this.getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
     }
 
 }

@@ -45,8 +45,8 @@ public class User {
         return user.getParseFile(KEY_PROFILE_IMAGE);
     }
 
-    public void setProfileImage(File photoFile) {
-        user.put(KEY_PROFILE_IMAGE, new ParseFile(photoFile));
+    public void setProfileImage(ParseFile photoFile) {
+        user.put(KEY_PROFILE_IMAGE, photoFile);
     }
 
     public void addToList(Business business) {
