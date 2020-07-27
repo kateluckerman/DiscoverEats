@@ -23,5 +23,8 @@
     <string name="edit_profile">Edit Profile</string>
     <string name="camera_pic">Open Camera</string>
     <string name="gallery_pic">Choose from Gallery</string>
+    <string name="pickup">Pickup</string>
+    <string name="delivery">Delivery</string>
+    <string name="reservations">Takes Reservations</string>
 
 </resources>
