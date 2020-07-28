@@ -77,6 +77,8 @@ public class ProfileActivity extends AppCompatActivity {
         binding.rvList.setAdapter(adapter);
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
 
+        setListEdit();
+
         // get the user's saved business list
         ParseRelation<Business> list = user.getUser().getRelation(User.KEY_LIST);
         list.getQuery().findInBackground(new FindCallback<Business>() {
@@ -115,6 +117,40 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void setListEdit() {
+        binding.ivEditList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                makeVisible(binding.llEditItems);
+                makeVisible(binding.tvCancelEdit);
+                makeGone(binding.ivEditList);
+
+                makeGone(binding.llButtons);
+                makeGone(binding.llNames);
+                makeGone(binding.ivProfileImage);
+                makeGone(binding.ivSettings);
+
+                adapter.turnOnListEditing();
+
+                binding.tvCancelEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        makeVisible(binding.ivEditList);
+                        makeGone(binding.tvCancelEdit);
+                        makeGone(binding.llEditItems);
+
+                        makeVisible(binding.llButtons);
+                        makeVisible(binding.llNames);
+                        makeVisible(binding.ivProfileImage);
+                        makeVisible(binding.ivSettings);
+
+                        adapter.turnOffListEditing();
+                    }
+                });
+            }
+        });
+    }
+
     private void setSettingsMenu() {
         binding.ivSettings.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,9 +173,9 @@ public class ProfileActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.action_logout: {
-                    user.getUser().logOut();
                     Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
                     startActivity(intent);
+                    ParseUser.logOut();
                     finish();
                     break;
                 }

@@ -11,8 +11,8 @@
             android:id="@+id/llNames"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
             android:orientation="vertical">
@@ -21,30 +21,30 @@
                 android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:textSize="24sp"
-                android:gravity="center_horizontal"
                 android:layout_gravity="center_horizontal"
+                android:layout_margin="4dp"
+                android:gravity="center_horizontal"
+                android:textSize="24sp"
                 tools:text="Kate Lucky" />
 
             <EditText
                 android:id="@+id/etEditName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:textSize="24sp"
-                android:gravity="center_horizontal"
                 android:layout_gravity="center_horizontal"
-                android:visibility="gone"
-                android:hint="@string/add_name_hint" />
+                android:layout_margin="4dp"
+                android:gravity="center_horizontal"
+                android:hint="@string/add_name_hint"
+                android:textSize="24sp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/tvUsername"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_margin="4dp"
                 android:gravity="center_horizontal"
-                android:layout_gravity="center_horizontal"
                 tools:text="katelucky101" />
         </LinearLayout>
 
@@ -57,8 +57,8 @@
             android:layout_alignParentStart="true"
             android:layout_marginStart="12dp"
             android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:src="@drawable/add_icon" />
+            android:src="@drawable/add_icon"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnDoneEdit"
@@ -67,18 +67,17 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_margin="8dp"
-            android:visibility="gone"
-            android:text="@string/apply_button" />
+            android:text="@string/apply_button"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/ivSettings"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/settings_icon"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_margin="8dp"/>
-
+            android:layout_margin="8dp"
+            android:src="@drawable/settings_icon" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -86,14 +85,81 @@
             android:layout_above="@+id/llNames"
             android:layout_below="@id/llButtons">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvList"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true" />
+                android:layout_height="match_parent">
+
+                <RelativeLayout
+                    android:id="@+id/ListEditOnOff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true">
+
+                <ImageView
+                    android:id="@+id/ivEditList"
+                    android:layout_width="36dp"
+                    android:layout_height="18dp"
+                    android:scaleType="centerCrop"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/edit_background"
+                    android:padding="4dp"
+                    android:tint="@color/colorPrimaryDark"
+                    android:src="@drawable/edit_icon" />
+
+                <TextView
+                    android:id="@+id/tvCancelEdit"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:padding="4dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:background="@drawable/edit_background"
+                    android:text="cancel" />
+
+                </RelativeLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/ListEditOnOff"
+                    android:layout_above="@id/llEditItems"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true" />
+
+                <LinearLayout
+                    android:id="@+id/llEditItems"
+                    android:visibility="gone"
+                    android:background="@color/colorPrimaryDark"
+                    android:padding="4dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:text="Delete" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:textColor="@color/white"
+                        android:text="Mark Completed" />
+
+                </LinearLayout>
+
+
+            </RelativeLayout>
 
         </androidx.cardview.widget.CardView>
+
 
         <RelativeLayout
             android:id="@+id/llButtons"
@@ -102,8 +168,8 @@
             android:layout_alignParentTop="true"
             android:background="#FFAB40"
             android:orientation="horizontal"
-            android:paddingTop="16dp"
             android:paddingStart="16dp"
+            android:paddingTop="16dp"
             android:paddingEnd="16dp"
             android:paddingBottom="4dp">
 
@@ -111,39 +177,39 @@
                 android:id="@+id/ivSwipe"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:padding="6dp"
+                android:layout_below="@id/ivUp"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/small_button_circle"
-                android:layout_below="@id/ivUp"
+                android:padding="6dp"
                 android:src="@drawable/swipe_icon" />
 
             <ImageView
                 android:id="@+id/ivUp"
                 android:layout_width="48dp"
                 android:layout_height="16dp"
-                android:scaleType="fitXY"
                 android:layout_alignStart="@id/ivSwipe"
                 android:layout_alignEnd="@id/ivSwipe"
                 android:layout_alignParentTop="true"
+                android:scaleType="fitXY"
                 android:src="@drawable/white_up_arrow" />
 
             <ImageView
                 android:id="@+id/ivSearch"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:padding="12dp"
-                android:background="@drawable/button_circle"
                 android:layout_alignParentStart="true"
                 android:layout_marginStart="24dp"
+                android:background="@drawable/button_circle"
+                android:padding="12dp"
                 android:src="@drawable/search_icon" />
 
             <ImageView
                 android:id="@+id/ivFriends"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:background="@drawable/button_circle"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="24dp"
+                android:background="@drawable/button_circle"
                 android:src="@drawable/friends_icon" />
         </RelativeLayout>
 

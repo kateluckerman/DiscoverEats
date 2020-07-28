@@ -8,5 +8,6 @@
     <color name="unselected_text">#808080</color>
     <color name="light_gray">#d3d3d3</color>
     <color name="blue_accent">#3F51B5</color>
+    <color name="red">#FF0000</color>
 
 </resources>
