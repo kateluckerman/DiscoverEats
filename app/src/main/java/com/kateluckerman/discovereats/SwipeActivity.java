@@ -9,9 +9,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -27,7 +24,6 @@ import com.kateluckerman.discovereats.databinding.ActivitySwipeBinding;
 import com.kateluckerman.discovereats.models.Business;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -46,7 +42,6 @@ import okhttp3.Headers;
 
 public class SwipeActivity extends AppCompatActivity {
 
-    public static final String YELP_SEARCH_ENDPOINT = "https://api.yelp.com/v3/businesses/search";
     public static final String TAG = "SwipeFragment";
     public static final int FILTER_REQUEST_CODE = 1;
 
@@ -68,32 +63,39 @@ public class SwipeActivity extends AppCompatActivity {
     private int searchIndex;
     // stores the index of user's last seen result out of results of the most recent API call
     private int APIresultIndex;
-    // dictates how many results the API gets with each call - max allowed is 50
-    public static final int LIMIT = 5;
+
+    YelpClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_swipe);
 
-        setSwipeOnCard();
         setProfileButton();
         setFilterButton();
 
         currUser = ParseUser.getCurrentUser();
         businesses = new ArrayList<>();
 
+        client = new YelpClient(this);
+
+        defaultSearch();
+    }
+
+    private void defaultSearch() {
         // initialize startup search to be user's most recent search or default
         ParseQuery<ParseObject> recentSearchQuery = currUser.getRelation(User.KEY_SEARCHES).getQuery().orderByDescending(ParseUser.KEY_UPDATED_AT);
         recentSearchQuery.setLimit(1).findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 // user has no search queries
-                if (objects.isEmpty()) {
+                if (objects == null || objects.isEmpty()) {
                     // set location as default
-                    locationString = "Bay Area";
+                    locationString = toBasicString("Bay Area");
+                    client.setLocation(locationString);
                     createNewSearch();
                 } else {
+                    // resume user's most recent search
                     resumeSearch(objects.get(0));
                 }
                 getYelpResults();
@@ -121,7 +123,6 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
-
     private void createNewSearch() {
         currSearch = new ParseObject(User.Search.CLASS_NAME);
         currSearch.put(User.Search.KEY_LOCATION, locationString);
@@ -141,6 +142,7 @@ public class SwipeActivity extends AppCompatActivity {
         // save the Parse search locally so the user's progress can be updated
         currSearch = object;
         locationString = currSearch.getString(User.Search.KEY_LOCATION);
+        client.setLocation(toBasicString(locationString));
         // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
         Number storedIndex = currSearch.getNumber(User.Search.KEY_SEARCH_INDEX);
         if (storedIndex != null) {
@@ -151,27 +153,15 @@ public class SwipeActivity extends AppCompatActivity {
     }
 
     public void getYelpResults() {
-        // set up request with parameters and api key header
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("limit", LIMIT);
-        if (usingCurrentLocation) {
-            // TODO: Codepath's HTTP client won't let me put doubles so I'm going to need to change a real one
-            params.put("longitude", (int) currentLocation.getLongitude());
-            params.put("latitude", (int) currentLocation.getLatitude());
-        } else {
-            params.put("location", locationString);
-        }
-        params.put("categories", "restaurants");
-        RequestHeaders requestHeaders = new RequestHeaders();
-        requestHeaders.put("Authorization", "Bearer " + getString(R.string.yelp_api_key));
+
+        client.setBusinessSearch();
         // tell API to only load results after the index of the last one seen
-        params.put("offset", searchIndex + 1);
+        client.setOffset(searchIndex + 1);
 
         // send request
-        client.get(YELP_SEARCH_ENDPOINT, requestHeaders, params, new JsonHttpResponseHandler() {
+        client.get(client.endpoint, client.headers, client.params, new JsonHttpResponseHandler() {
             @Override
-            public void onSuccess(final int statusCode, Headers headers, JSON json) {
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
                 try {
                     // reset progress through API results
@@ -189,6 +179,8 @@ public class SwipeActivity extends AppCompatActivity {
 
                     // load the first result into view
                     loadNextResult();
+
+                    setSwipeOnCard();
 
                     // set fork icon click to save business and load next
                     binding.ivHeart.setOnClickListener(new View.OnClickListener() {
@@ -223,6 +215,7 @@ public class SwipeActivity extends AppCompatActivity {
         final GestureDetector gestureDetector = setSwipeDetector();
 
         binding.card.setOnTouchListener(new View.OnTouchListener() {
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return gestureDetector.onTouchEvent(event);
@@ -233,6 +226,16 @@ public class SwipeActivity extends AppCompatActivity {
     private GestureDetector setSwipeDetector() {
         final GestureDetector gesture = new GestureDetector(this,
                 new GestureDetector.SimpleOnGestureListener() {
+
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        Intent intent = new Intent(SwipeActivity.this, DetailsActivity.class);
+                        Business business = businesses.get(APIresultIndex);
+//                        Parcelable parcelable = Parcels.wrap(business);
+                        intent.putExtra("business", business);
+                        startActivity(intent);
+                        return true;
+                    }
 
                     @Override
                     public boolean onDown(MotionEvent e) {
@@ -298,7 +301,8 @@ public class SwipeActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 String locationString = data.getStringExtra("locationString");
                 if (!locationString.isEmpty()) {
-                    this.locationString = locationString;
+                    this.locationString = toBasicString(locationString);
+                    client.setLocation(locationString);
                     Log.i(TAG, "filter result" + locationString);
                     usingCurrentLocation = false;
                     setSearch();
@@ -307,12 +311,20 @@ public class SwipeActivity extends AppCompatActivity {
                 if (currentLocation != null) {
                     usingCurrentLocation = true;
                     this.currentLocation = currentLocation;
+                    client.useCurrentLocation(currentLocation);
                     Log.i(TAG, "current location is not null");
                     getYelpResults();
                 }
 
             }
         }
+    }
+
+    private String toBasicString(String string) {
+        String result = string.trim();
+        result = result.toLowerCase();
+        result = result.replaceAll(",", "");
+        return result;
     }
 
     private void loadBusinessView(Business business) {
@@ -347,7 +359,7 @@ public class SwipeActivity extends AppCompatActivity {
                         @Override
                         public void done(ParseException e) {
                             if (e != null) {
-                                Log.e("TAG", "Error while saving", e);
+                                Log.e(TAG, "Error while saving", e);
                                 Toast.makeText(SwipeActivity.this, "Error while saving!", Toast.LENGTH_SHORT).show();
                                 return;
                             }
