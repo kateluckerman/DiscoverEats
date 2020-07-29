@@ -27,4 +27,8 @@
     <string name="delivery">Delivery</string>
     <string name="reservations">Takes Reservations</string>
 
+    <string name="delete">Delete</string>
+    <string name="completed">Mark Completed</string>
+    <string name="cancel">Cancel</string>
+
 </resources>

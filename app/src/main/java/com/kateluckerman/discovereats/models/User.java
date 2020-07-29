@@ -3,14 +3,13 @@ package com.kateluckerman.discovereats.models;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 
-import java.io.File;
-
 public class User {
 
     public static final String KEY_NAME = "name";
     public static final String KEY_PROFILE_IMAGE = "profileImage";
     public static final String KEY_LIST = "list";
     public static final String KEY_SEARCHES = "searches";
+    public static final String KEY_COMPLETED = "completed";
 
     public ParseUser user;
 
@@ -47,6 +46,11 @@ public class User {
 
     public void setProfileImage(ParseFile photoFile) {
         user.put(KEY_PROFILE_IMAGE, photoFile);
+    }
+
+    public void markCompleted(Business business) {
+        user.getRelation(KEY_COMPLETED).add(business);
+        user.saveInBackground();
     }
 
     public void addToList(Business business) {

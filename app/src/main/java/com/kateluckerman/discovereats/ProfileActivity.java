@@ -31,6 +31,8 @@ import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -79,6 +81,33 @@ public class ProfileActivity extends AppCompatActivity {
 
         setListEdit();
 
+        binding.tvDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<Business> selected = adapter.getSelected();
+                // delete from view
+                allBusinesses.removeAll(selected);
+                adapter.notifyDataSetChanged();
+                for (Business business : selected) {
+                    user.getUser().getRelation(User.KEY_LIST).remove(business);
+                }
+                user.getUser().saveInBackground();
+                turnOffListEdit();
+            }
+        });
+
+        binding.tvCompleted.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<Business> selected = adapter.getSelected();
+                for (Business business : selected) {
+                    user.markCompleted(business);
+                }
+                turnOffListEdit();
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         // get the user's saved business list
         ParseRelation<Business> list = user.getUser().getRelation(User.KEY_LIST);
         list.getQuery().findInBackground(new FindCallback<Business>() {
@@ -88,6 +117,25 @@ public class ProfileActivity extends AppCompatActivity {
                     Log.e(TAG, "Error getting business list", e);
                 } else {
                     allBusinesses.addAll(objects);
+                    // failed attempt to make the completed items go to the back of the list
+//                    for (Business business : objects) {
+//                        ParseRelation<Business> completed = user.getUser().getRelation(User.KEY_COMPLETED);
+//                        completed.getQuery().whereEqualTo(ParseObject.KEY_OBJECT_ID, business.getObjectId()).findInBackground(new FindCallback<Business>() {
+//                            @Override
+//                            public void done(List<Business> matches, ParseException e) {
+//                                if (e != null) {
+//                                    Log.e(TAG, e.getMessage(), e);
+//                                    return;
+//                                }
+//                                if (matches == null || matches.isEmpty())
+//                                    return;
+//                                Log.i(TAG, "success finding completed matches");
+//                                allBusinesses.remove(matches.get(0));
+//                                allBusinesses.add(allBusinesses.size() - 1, matches.get(0));
+//                                adapter.notifyDataSetChanged();
+//                            }
+//                        });
+//                    }
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -135,20 +183,24 @@ public class ProfileActivity extends AppCompatActivity {
                 binding.tvCancelEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        makeVisible(binding.ivEditList);
-                        makeGone(binding.tvCancelEdit);
-                        makeGone(binding.llEditItems);
-
-                        makeVisible(binding.llButtons);
-                        makeVisible(binding.llNames);
-                        makeVisible(binding.ivProfileImage);
-                        makeVisible(binding.ivSettings);
-
-                        adapter.turnOffListEditing();
+                        turnOffListEdit();
                     }
                 });
             }
         });
+    }
+
+    private void turnOffListEdit() {
+        makeVisible(binding.ivEditList);
+        makeGone(binding.tvCancelEdit);
+        makeGone(binding.llEditItems);
+
+        makeVisible(binding.llButtons);
+        makeVisible(binding.llNames);
+        makeVisible(binding.ivProfileImage);
+        makeVisible(binding.ivSettings);
+
+        adapter.turnOffListEditing();
     }
 
     private void setSettingsMenu() {
@@ -169,7 +221,7 @@ public class ProfileActivity extends AppCompatActivity {
         public boolean onMenuItemClick(MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.action_edit_profile: {
-                    turnOnEdit();
+                    turnOnProfileEdit();
                     break;
                 }
                 case R.id.action_logout: {
@@ -183,7 +235,7 @@ public class ProfileActivity extends AppCompatActivity {
             return true;
         }
 
-        private void turnOnEdit() {
+        private void turnOnProfileEdit() {
             makeGone(binding.tvName);
             makeGone(binding.ivSettings);
 
@@ -212,13 +264,13 @@ public class ProfileActivity extends AppCompatActivity {
                     user.setName(binding.etEditName.getText().toString());
                     user.getUser().saveInBackground();
 
-                    turnOffEdit();
+                    turnOffProfileEdit();
                 }
             });
         }
 
 
-        private void turnOffEdit() {
+        private void turnOffProfileEdit() {
             makeGone(binding.etEditName);
             makeGone(binding.btnDoneEdit);
 
