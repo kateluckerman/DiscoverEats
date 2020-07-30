@@ -52,9 +52,6 @@ public class SwipeActivity extends AppCompatActivity {
 
     ParseUser currUser;
     ParseObject currSearch;
-    String locationString;
-    Location currentLocation;
-    boolean usingCurrentLocation = false;
 
     // for each combination of search queries, the Yelp API can access up to 1000 results in increments of up to 50
     // for some searches, the total is lower than 1000, so we have to store the total to prevent swiping past the results
@@ -90,10 +87,8 @@ public class SwipeActivity extends AppCompatActivity {
             public void done(List<ParseObject> objects, ParseException e) {
                 // user has no search queries
                 if (objects == null || objects.isEmpty()) {
-                    // set location as default
-                    locationString = toBasicString("Bay Area");
-                    client.setLocation(locationString);
-                    createNewSearch();
+                    // create new search with default location
+                    createNewSearch(toBasicString("Bay Area"));
                 } else {
                     // resume user's most recent search
                     resumeSearch(objects.get(0));
@@ -103,9 +98,9 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
-    private void setSearch() {
+    private void setSearch(final String location) {
         // check if the user already has a search with the same location string
-        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, locationString).setLimit(1).findInBackground(new FindCallback<ParseObject>() {
+        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).setLimit(1).findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e != null) {
@@ -114,7 +109,7 @@ public class SwipeActivity extends AppCompatActivity {
                 }
                 // if no matching search is found
                 if (objects.isEmpty()) {
-                    createNewSearch();
+                    createNewSearch(location);
                 } else {
                     resumeSearch(objects.get(0));
                 }
@@ -123,9 +118,10 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
-    private void createNewSearch() {
+    private void createNewSearch(String location) {
+        client.setLocation(location);
         currSearch = new ParseObject(User.Search.CLASS_NAME);
-        currSearch.put(User.Search.KEY_LOCATION, locationString);
+        currSearch.put(User.Search.KEY_LOCATION, location);
         currSearch.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -141,8 +137,8 @@ public class SwipeActivity extends AppCompatActivity {
     private void resumeSearch(ParseObject object) {
         // save the Parse search locally so the user's progress can be updated
         currSearch = object;
-        locationString = currSearch.getString(User.Search.KEY_LOCATION);
-        client.setLocation(toBasicString(locationString));
+        String location = currSearch.getString(User.Search.KEY_LOCATION);
+        client.setLocation(toBasicString(location));
         // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
         Number storedIndex = currSearch.getNumber(User.Search.KEY_SEARCH_INDEX);
         if (storedIndex != null) {
@@ -167,11 +163,8 @@ public class SwipeActivity extends AppCompatActivity {
                     // reset progress through API results
                     APIresultIndex = INITIAL_INDEX;
                     // store the number of accessible results for this search query
-                    resultTotal = jsonObject.getInt("total");
-                    if (resultTotal > 1000) {
-                        resultTotal = 1000;
-                    }
-                    // add result into global list of Business objects
+                    resultTotal = Math.min(jsonObject.getInt("total"), 1000);
+                    // add results into global list of Business objects
                     JSONArray results = jsonObject.getJSONArray("businesses");
                     Log.i(TAG, "Success with Yelp network request: " + jsonObject.toString());
                     businesses.clear();
@@ -180,23 +173,8 @@ public class SwipeActivity extends AppCompatActivity {
                     // load the first result into view
                     loadNextResult();
 
-                    setSwipeOnCard();
-
-                    // set fork icon click to save business and load next
-                    binding.ivHeart.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            saveAndLoadNext(businesses.get(APIresultIndex));
-                        }
-                    });
-
-                    // set x icon click to load next
-                    binding.ivX.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            loadNextResult();
-                        }
-                    });
+                    // set buttons and swiping
+                    configureOptions();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -205,6 +183,24 @@ public class SwipeActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                 Log.e(TAG, "Failure of Yelp network request: " + response, throwable);
+            }
+        });
+    }
+
+    private void configureOptions() {
+        setSwipeOnCard();
+        // set fork icon click to save business and load next
+        binding.ivHeart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveAndLoadNext(businesses.get(APIresultIndex));
+            }
+        });
+        // set x icon click to load next
+        binding.ivX.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadNextResult();
             }
         });
     }
@@ -299,23 +295,22 @@ public class SwipeActivity extends AppCompatActivity {
 
         if (requestCode == FILTER_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                String locationString = data.getStringExtra("locationString");
-                if (!locationString.isEmpty()) {
-                    this.locationString = toBasicString(locationString);
-                    client.setLocation(locationString);
-                    Log.i(TAG, "filter result" + locationString);
-                    usingCurrentLocation = false;
-                    setSearch();
-                }
                 Location currentLocation = Parcels.unwrap(data.getParcelableExtra("currentLocation"));
                 if (currentLocation != null) {
-                    usingCurrentLocation = true;
-                    this.currentLocation = currentLocation;
                     client.useCurrentLocation(currentLocation);
                     Log.i(TAG, "current location is not null");
-                    getYelpResults();
+                    currSearch = null;
                 }
-
+                String category = data.getStringExtra("category");
+                if (!category.isEmpty()) {
+                    client.setCategory(category);
+                }
+                String locationString = data.getStringExtra("locationString");
+                if (!locationString.isEmpty()) {
+                    setSearch(toBasicString(locationString));
+                    return;
+                }
+                getYelpResults();
             }
         }
     }
@@ -400,7 +395,7 @@ public class SwipeActivity extends AppCompatActivity {
         APIresultIndex++;
         searchIndex++;
         // save the progress through this search
-        if (!usingCurrentLocation) {
+        if (currSearch != null) {
             currSearch.put(User.Search.KEY_SEARCH_INDEX, searchIndex);
             currSearch.saveInBackground();
         }

@@ -46,6 +46,12 @@ public class FilterActivity extends AppCompatActivity {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        setCancel();
+        setUseLocation();
+        setApply();
+    }
+
+    private void setCancel() {
         binding.ivCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,7 +60,9 @@ public class FilterActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
 
+    private void setUseLocation() {
         binding.btnUseLocation.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("MissingPermission")
             @Override
@@ -93,27 +101,33 @@ public class FilterActivity extends AppCompatActivity {
                         }
                         else {
                             currentLocation = location;
+                            binding.btnUseLocation.setBackgroundColor(getColor(R.color.colorPrimary));
                             Log.i(TAG, "Location: " + currentLocation.getLongitude() + " " + currentLocation.getLatitude());
                         }
                     }
                 });
             }
         });
+    }
 
+    private void setApply() {
         binding.btnApply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                fusedLocationClient.removeLocationUpdates(new LocationCallback());
-                String locationString = binding.etLocation.getText().toString();
-                // pass both of those things back to the other activity
                 Intent intent = new Intent();
-                intent.putExtra("locationString", locationString);
-                intent.putExtra("currentLocation", Parcels.wrap(currentLocation));
+                putIntentExtras(intent);
                 setResult(RESULT_OK, intent);
                 finish();
-
             }
         });
+    }
+
+    private void putIntentExtras(Intent intent) {
+        intent.putExtra("locationString", binding.etLocation.getText().toString());
+        intent.putExtra("currentLocation", Parcels.wrap(currentLocation));
+        intent.putExtra("category", binding.etCategory.getText().toString());
+        intent.putExtra("distance", binding.etDistance.getText().toString());
     }
 
     @Override
@@ -133,6 +147,4 @@ public class FilterActivity extends AppCompatActivity {
             EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
         }
     }
-
-
 }

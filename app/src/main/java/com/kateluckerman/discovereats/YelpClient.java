@@ -25,10 +25,10 @@ public class YelpClient extends AsyncHttpClient {
         params = new RequestParams();
         headers = new RequestHeaders();
         headers.put("Authorization", "Bearer " + context.getString(R.string.yelp_api_key));
+        categories = "restaurants";
     }
 
     public void setBusinessSearch() {
-        categories = "restaurants";
         params.put("categories", categories);
         params.put("limit", SEARCH_LIMIT);
         endpoint = BUSINESS_SEARCH_ENDPOINT;
@@ -51,12 +51,11 @@ public class YelpClient extends AsyncHttpClient {
     }
 
     public void addCategory(String category) {
-        categories += category;
+        categories += ", " + category;
         params.put("categories", categories);
     }
 
-
-
-
-
+    public void setCategory(String category) {
+        categories = category;
+    }
 }
