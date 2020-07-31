@@ -62,6 +62,8 @@ public class SwipeActivity extends AppCompatActivity {
     private int APIresultIndex;
 
     YelpClient client;
+    double searchLatitude;
+    double searchLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,10 +120,46 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
+    private void setSearch(final String location, final String category) {
+        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location)
+                .whereEqualTo(User.Search.KEY_CATEGORY, category).findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
+                    return;
+                }
+                if (objects == null || objects.isEmpty()) {
+                    createNewSearch(location, category);
+                } else {
+                    resumeSearch(objects.get(0));
+                }
+            }
+        });
+    }
+
     private void createNewSearch(String location) {
         client.setLocation(location);
         currSearch = new ParseObject(User.Search.CLASS_NAME);
         currSearch.put(User.Search.KEY_LOCATION, location);
+        currSearch.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                // add the new search to the current user
+                currUser.getRelation(User.KEY_SEARCHES).add(currSearch);
+                currUser.saveInBackground();
+            }
+        });
+        // no results for this search have been seen yet, so set index to initial value
+        searchIndex = INITIAL_INDEX;
+    }
+
+    private void createNewSearch(String location, String category) {
+        client.setLocation(location);
+        currSearch = new ParseObject(User.Search.CLASS_NAME);
+        currSearch.put(User.Search.KEY_LOCATION, location);
+        client.setCategory(category);
+        currSearch.put(User.Search.KEY_CATEGORY, category);
         currSearch.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -139,6 +177,10 @@ public class SwipeActivity extends AppCompatActivity {
         currSearch = object;
         String location = currSearch.getString(User.Search.KEY_LOCATION);
         client.setLocation(toBasicString(location));
+        String category = currSearch.getString(User.Search.KEY_CATEGORY);
+        if (category != null && !category.isEmpty()) {
+            client.setCategory(category);
+        }
         // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
         Number storedIndex = currSearch.getNumber(User.Search.KEY_SEARCH_INDEX);
         if (storedIndex != null) {
@@ -169,6 +211,10 @@ public class SwipeActivity extends AppCompatActivity {
                     Log.i(TAG, "Success with Yelp network request: " + jsonObject.toString());
                     businesses.clear();
                     businesses.addAll(Business.fromJsonArray(results));
+
+                    // store center of search region for calculating distance
+                    searchLatitude = jsonObject.getJSONObject("region").getJSONObject("center").getDouble("latitude");
+                    searchLongitude = jsonObject.getJSONObject("region").getJSONObject("center").getDouble("longitude");
 
                     // load the first result into view
                     loadNextResult();
@@ -227,8 +273,9 @@ public class SwipeActivity extends AppCompatActivity {
                     public boolean onSingleTapConfirmed(MotionEvent e) {
                         Intent intent = new Intent(SwipeActivity.this, DetailsActivity.class);
                         Business business = businesses.get(APIresultIndex);
-//                        Parcelable parcelable = Parcels.wrap(business);
                         intent.putExtra("business", business);
+                        intent.putExtra("searchLatitude", searchLatitude);
+                        intent.putExtra("searchLongitude", searchLongitude);
                         startActivity(intent);
                         return true;
                     }
@@ -296,21 +343,27 @@ public class SwipeActivity extends AppCompatActivity {
         if (requestCode == FILTER_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Location currentLocation = Parcels.unwrap(data.getParcelableExtra("currentLocation"));
+                String category = data.getStringExtra("category");
                 if (currentLocation != null) {
                     client.useCurrentLocation(currentLocation);
                     Log.i(TAG, "current location is not null");
                     currSearch = null;
-                }
-                String category = data.getStringExtra("category");
-                if (!category.isEmpty()) {
-                    client.setCategory(category);
+                    if (!category.isEmpty()) {
+                        client.setCategory(category);
+                    }
+                    getYelpResults();
+                    return;
                 }
                 String locationString = data.getStringExtra("locationString");
                 if (!locationString.isEmpty()) {
-                    setSearch(toBasicString(locationString));
+                    if (category.isEmpty()) {
+                        setSearch(toBasicString(locationString));
+                    }
+                    else {
+                        setSearch(toBasicString(locationString), category);
+                    }
                     return;
                 }
-                getYelpResults();
             }
         }
     }
@@ -331,10 +384,6 @@ public class SwipeActivity extends AppCompatActivity {
                 getPackageName());
         binding.ivRating.setImageDrawable(ContextCompat.getDrawable(this, resourceId));
         Glide.with(this).load(business.getPhotoURL()).into(binding.ivMainImage);
-//        // Create "view on Yelp" link and set the textview to respond to link clicks
-//        Spanned html = Html.fromHtml("<a href='" + business.getWebsite() + "'>" + getString(R.string.yelp_link) + "</a>");
-//        binding.tvWebsite.setMovementMethod(LinkMovementMethod.getInstance());
-//        binding.tvWebsite.setText(html);
     }
 
     private void saveAndLoadNext(final Business business) {
