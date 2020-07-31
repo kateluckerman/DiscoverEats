@@ -91,14 +91,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         }
 
         public void bind(final Business business) {
-//            binding.getRoot().setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        Intent intent = new Intent(context, DetailsActivity.class);
-//                        intent.putExtra("business", businesses.get(getAdapterPosition()));
-//                        context.startActivity(intent);
-//                    }
-//                });
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(context, DetailsActivity.class);
+                        intent.putExtra("business", businesses.get(getAdapterPosition()));
+                        context.startActivity(intent);
+                    }
+                });
 
             business.getFromParse();
             binding.tvName.setText(business.getName());
@@ -123,9 +123,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
             // if this business has already been selected in this session
             if (selected.contains(business)) {
-                binding.checkbox.setChecked(true);
+                check();
             } else {
-                binding.checkbox.setChecked(false);
+                uncheck();
             }
 
             binding.checkbox.setOnClickListener(new View.OnClickListener() {
@@ -146,6 +146,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         public void makeUnselectable() {
             binding.checkbox.setVisibility(View.GONE);
+        }
+
+        public void check() {
+            binding.checkbox.setChecked(true);
         }
 
         public void uncheck() {

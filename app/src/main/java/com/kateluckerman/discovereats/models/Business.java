@@ -1,5 +1,7 @@
 package com.kateluckerman.discovereats.models;
 
+import android.os.Bundle;
+
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
 
@@ -13,16 +15,22 @@ import java.util.List;
 @ParseClassName("Business")
 public class Business extends ParseObject {
 
-    private String name;
-    private List<String> categories;
-    private String location;
-    private String address;
-    private String price;
-    private double rating;
-    private String photoURL;
-    private String website;
-    private String alias;
-    private String objectID;
+    public String name;
+    public List<String> categories;
+    public String location;
+    public String price;
+    public double rating;
+    public String photoURL;
+    public String website;
+    public String alias;
+    public String id;
+    public String address = "";
+    public int reviewCount;
+    public double latitude;
+    public double longitude;
+    public List<String> photoURLS;
+    public List<String> tags;
+    public boolean open_now;
 
     public static final String KEY_NAME = "name";
     public static final String KEY_CATEGORIES = "categories";
@@ -34,64 +42,16 @@ public class Business extends ParseObject {
     public static final String KEY_IMAGE_URL = "imageURL";
     public static final String KEY_WEBSITE = "website";
     public static final String KEY_ALIAS = "alias";
+    public static final String KEY_ID = "businessID";
 
     public Business() {}
 
-    // sets business fields based on Yelp request JSON object information
-    public static Business fromJson(JSONObject jsonObject) throws JSONException {
-        Business business = new Business();
-        business.name = jsonObject.getString("name");
-        business.categories = new ArrayList<>();
-        JSONArray categoryArray = jsonObject.getJSONArray("categories");
-        for (int i = 0; i < categoryArray.length(); i++) {
-            business.categories.add(categoryArray.getJSONObject(i).getString("title"));
-        }
-        business.location = jsonObject.getJSONObject("location").getString("city");
-        business.address = jsonObject.getJSONObject("location").getString("address1");
-        if (jsonObject.has("price"))
-            business.price = jsonObject.getString("price");
-        business.rating = jsonObject.getDouble("rating");
-        business.photoURL = jsonObject.getString("image_url");
-        business.website = jsonObject.getString("url");
-        business.alias = jsonObject.getString("alias");
-        return business;
-    }
-
-    // processes businesses JSON array from Yelp request
-    public static List<Business> fromJsonArray(JSONArray jsonArray) throws JSONException {
-        List<Business> tweets = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            tweets.add(fromJson(jsonArray.getJSONObject(i)));
-        }
-        return tweets;
-    }
-
-    public void setParseFields() {
-        put(KEY_NAME, name);
-        addAll(KEY_CATEGORIES, categories);
-        put(KEY_LOCATION, location);
-        put(KEY_ADDRESS, address);
-        put(KEY_PRICE, price);
-        put(KEY_RATING, rating);
-        put(KEY_IMAGE_URL, photoURL);
-        put(KEY_WEBSITE, website);
-        put(KEY_ALIAS, alias);
-    }
-
-    public void getFromParse() {
-        name = getString(KEY_NAME);
-        categories = getList(KEY_CATEGORIES);
-        location = getString(KEY_LOCATION);
-        address = getString(KEY_ADDRESS);
-        price = getString(KEY_PRICE);
-        rating = getDouble(KEY_RATING);
-        photoURL = getString(KEY_IMAGE_URL);
-        website = getString(KEY_WEBSITE);
-        alias = getString(KEY_ALIAS);
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<String> getCategories() {
@@ -122,6 +82,85 @@ public class Business extends ParseObject {
 
     public String getAlias() {return alias; }
 
+    public String getId() { return id; }
+
+    // sets business fields based on Yelp request JSON object information
+    public static Business fromJson(JSONObject jsonObject) throws JSONException {
+        Business business = new Business();
+        business.name = jsonObject.getString("name");
+        business.categories = new ArrayList<>();
+        JSONArray categoryArray = jsonObject.getJSONArray("categories");
+        for (int i = 0; i < categoryArray.length(); i++) {
+            business.categories.add(categoryArray.getJSONObject(i).getString("title"));
+        }
+        business.location = jsonObject.getJSONObject("location").getString("city");
+        if (jsonObject.has("price"))
+            business.price = jsonObject.getString("price");
+        business.rating = jsonObject.getDouble("rating");
+        business.photoURL = jsonObject.getString("image_url");
+        business.website = jsonObject.getString("url");
+        business.alias = jsonObject.getString("alias");
+        business.id = jsonObject.getString("id");
+        return business;
+    }
+
+    // processes businesses JSON array from Yelp request
+    public static List<Business> fromJsonArray(JSONArray jsonArray) throws JSONException {
+        List<Business> tweets = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            tweets.add(fromJson(jsonArray.getJSONObject(i)));
+        }
+        return tweets;
+    }
+
+    public void fromDetailsJSON(JSONObject jsonObject) throws JSONException {
+        this.reviewCount = jsonObject.getInt("review_count");
+        JSONArray displayAddress = jsonObject.getJSONObject("location").getJSONArray("display_address");
+        for (int i = 0; i < displayAddress.length(); i++) {
+            this.address += displayAddress.getString(i) + " ";
+        }
+        this.latitude = jsonObject.getJSONObject("coordinates").getDouble("latitude");
+        this.longitude = jsonObject.getJSONObject("coordinates").getDouble("longitude");
+        // more photos
+        JSONArray photos = jsonObject.getJSONArray("photos");
+        this.photoURLS = new ArrayList<>();
+        for (int i = 0; i < photos.length(); i++) {
+            this.photoURLS.add(photos.getString(i));
+        }
+        this.open_now = jsonObject.getJSONArray("hours").getJSONObject(0).getBoolean("is_open_now");
+        JSONArray transactions = jsonObject.getJSONArray("transactions");
+        this.tags = new ArrayList<>();
+        for (int i = 0; i < transactions.length(); i++) {
+            this.tags.add(transactions.getString(i));
+        }
+    }
+
+    public void setParseFields() {
+        put(KEY_NAME, name);
+        addAll(KEY_CATEGORIES, categories);
+        put(KEY_LOCATION, location);
+//        put(KEY_ADDRESS, address);
+        put(KEY_PRICE, price);
+        put(KEY_RATING, rating);
+        put(KEY_IMAGE_URL, photoURL);
+        put(KEY_WEBSITE, website);
+        put(KEY_ALIAS, alias);
+        put(KEY_ID, id);
+    }
+
+    public void getFromParse() {
+        name = getString(KEY_NAME);
+        categories = getList(KEY_CATEGORIES);
+        location = getString(KEY_LOCATION);
+        address = getString(KEY_ADDRESS);
+        price = getString(KEY_PRICE);
+        rating = getDouble(KEY_RATING);
+        photoURL = getString(KEY_IMAGE_URL);
+        website = getString(KEY_WEBSITE);
+        alias = getString(KEY_ALIAS);
+        id = getString(KEY_ID);
+    }
+
     // convert list of categories to comma separated string
     public String getCategoryString() {
         String categoryString = "";
@@ -144,5 +183,33 @@ public class Business extends ParseObject {
         if (vertical)
             drawableFileName += "_v";
         return drawableFileName;
+    }
+
+    // ParseObject implements Parcelable, so Parse recommends using onSave/onRestoreInstanceState
+    // to hold instance information not stored in Parse
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("name", name);
+        outState.putStringArrayList("categories", (ArrayList<String>) categories);
+//        outState.putString("location", location);
+        outState.putString("price", price);
+        outState.putDouble("rating", rating);
+//        outState.putString("photoURL", photoURL);
+        outState.putString("website", website);
+//        outState.putString("alias", alias);
+        outState.putString("id", id);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        name = savedInstanceState.getString("name");
+        categories = savedInstanceState.getStringArrayList("categories");
+//        location = savedInstanceState.getString("location");
+        price = savedInstanceState.getString("price");
+        rating = savedInstanceState.getDouble("rating");
+//        photoURL = savedInstanceState.getString("photoURL");
+        website = savedInstanceState.getString("website", website);
+//        alias = savedInstanceState.getString("alias", alias);
+        id = savedInstanceState.getString("id");
     }
 }

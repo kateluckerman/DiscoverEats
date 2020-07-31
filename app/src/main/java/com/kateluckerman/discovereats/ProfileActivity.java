@@ -92,7 +92,7 @@ public class ProfileActivity extends AppCompatActivity {
                     user.getUser().getRelation(User.KEY_LIST).remove(business);
                 }
                 user.getUser().saveInBackground();
-                turnOffListEdit();
+                turnOffListEditing();
             }
         });
 
@@ -103,7 +103,7 @@ public class ProfileActivity extends AppCompatActivity {
                 for (Business business : selected) {
                     user.markCompleted(business);
                 }
-                turnOffListEdit();
+                turnOffListEditing();
                 adapter.notifyDataSetChanged();
             }
         });
@@ -183,14 +183,14 @@ public class ProfileActivity extends AppCompatActivity {
                 binding.tvCancelEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        turnOffListEdit();
+                        turnOffListEditing();
                     }
                 });
             }
         });
     }
 
-    private void turnOffListEdit() {
+    private void turnOffListEditing() {
         makeVisible(binding.ivEditList);
         makeGone(binding.tvCancelEdit);
         makeGone(binding.llEditItems);
