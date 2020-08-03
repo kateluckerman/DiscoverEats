@@ -7,6 +7,8 @@ import com.codepath.asynchttpclient.AsyncHttpClient;
 import com.codepath.asynchttpclient.RequestHeaders;
 import com.codepath.asynchttpclient.RequestParams;
 
+import java.util.Map;
+
 public class YelpClient extends AsyncHttpClient {
 
     RequestParams params;
@@ -25,11 +27,10 @@ public class YelpClient extends AsyncHttpClient {
         params = new RequestParams();
         headers = new RequestHeaders();
         headers.put("Authorization", "Bearer " + context.getString(R.string.yelp_api_key));
-        categories = "restaurants";
     }
 
-    public void setBusinessSearch() {
-        params.put("categories", categories);
+    public void setBusinessSearch(Map<String, String> inputParams) {
+        setParams(inputParams);
         params.put("limit", SEARCH_LIMIT);
         endpoint = BUSINESS_SEARCH_ENDPOINT;
     }
@@ -50,12 +51,18 @@ public class YelpClient extends AsyncHttpClient {
         params.remove("location");
     }
 
-    public void addCategory(String category) {
-        categories += ", " + category;
-        params.put("categories", categories);
-    }
 
-    public void setCategory(String category) {
-        categories = category;
+    public void setParams(Map<String, String> inputParams) {
+        if (inputParams == null) {
+            return;
+        }
+        String category = inputParams.get("category");
+        if (category == null || category.isEmpty())
+            category = "restaurants";
+        params.put("categories", category);
+        String distance = inputParams.get("distance");
+        if (distance != null && !distance.isEmpty()) {
+            params.put("radius", distance);
+        }
     }
 }

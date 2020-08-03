@@ -16,12 +16,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.codepath.asynchttpclient.AsyncHttpClient;
-import com.codepath.asynchttpclient.RequestHeaders;
-import com.codepath.asynchttpclient.RequestParams;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.kateluckerman.discovereats.databinding.ActivitySwipeBinding;
 import com.kateluckerman.discovereats.models.Business;
+import com.kateluckerman.discovereats.models.Search;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -36,7 +34,9 @@ import org.json.JSONObject;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Headers;
 
@@ -44,14 +44,15 @@ public class SwipeActivity extends AppCompatActivity {
 
     public static final String TAG = "SwipeFragment";
     public static final int FILTER_REQUEST_CODE = 1;
+    public static final int INITIAL_INDEX = -1;
 
     private ActivitySwipeBinding binding;
-
-    public static final int INITIAL_INDEX = -1;
     List<Business> businesses;
 
     ParseUser currUser;
     ParseObject currSearch;
+    YelpClient client;
+    Map<String, String> searchParams;
 
     // for each combination of search queries, the Yelp API can access up to 1000 results in increments of up to 50
     // for some searches, the total is lower than 1000, so we have to store the total to prevent swiping past the results
@@ -61,7 +62,6 @@ public class SwipeActivity extends AppCompatActivity {
     // stores the index of user's last seen result out of results of the most recent API call
     private int APIresultIndex;
 
-    YelpClient client;
     double searchLatitude;
     double searchLongitude;
 
@@ -89,50 +89,41 @@ public class SwipeActivity extends AppCompatActivity {
             public void done(List<ParseObject> objects, ParseException e) {
                 // user has no search queries
                 if (objects == null || objects.isEmpty()) {
-                    // create new search with default location
+                    // create new search with default location and empty parameters
+                    searchParams = new HashMap<>();
                     createNewSearch(toBasicString("Bay Area"));
                 } else {
                     // resume user's most recent search
                     resumeSearch(objects.get(0));
                 }
-                getYelpResults();
             }
         });
     }
 
     private void setSearch(final String location) {
         // check if the user already has a search with the same location string
-        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location).setLimit(1).findInBackground(new FindCallback<ParseObject>() {
+        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(Search.KEY_LOCATION, location)
+                .findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e != null) {
                     Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
                     return;
                 }
-                // if no matching search is found
+                // if no matching location search is found
                 if (objects.isEmpty()) {
                     createNewSearch(location);
                 } else {
-                    resumeSearch(objects.get(0));
-                }
-                getYelpResults();
-            }
-        });
-    }
-
-    private void setSearch(final String location, final String category) {
-        currUser.getRelation(User.KEY_SEARCHES).getQuery().whereEqualTo(User.Search.KEY_LOCATION, location)
-                .whereEqualTo(User.Search.KEY_CATEGORY, category).findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e != null) {
-                    Log.e(TAG, "Error with Parse search check: " + e.getMessage(), e);
-                    return;
-                }
-                if (objects == null || objects.isEmpty()) {
-                    createNewSearch(location, category);
-                } else {
-                    resumeSearch(objects.get(0));
+                    // check each matching location search for matching parameters
+                    for (ParseObject object : objects) {
+                        Map<String, String> objectMap = object.getMap(Search.KEY_PARAMS);
+                        if (objectMap != null && objectMap.equals(searchParams)) {
+                            resumeSearch(object);
+                            return;
+                        }
+                    }
+                    // if no matching parameters are found
+                    createNewSearch(location);
                 }
             }
         });
@@ -140,8 +131,9 @@ public class SwipeActivity extends AppCompatActivity {
 
     private void createNewSearch(String location) {
         client.setLocation(location);
-        currSearch = new ParseObject(User.Search.CLASS_NAME);
-        currSearch.put(User.Search.KEY_LOCATION, location);
+        currSearch = new ParseObject(Search.CLASS_NAME);
+        currSearch.put(Search.KEY_LOCATION, location);
+        currSearch.put(Search.KEY_PARAMS, searchParams);
         currSearch.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -152,47 +144,34 @@ public class SwipeActivity extends AppCompatActivity {
         });
         // no results for this search have been seen yet, so set index to initial value
         searchIndex = INITIAL_INDEX;
-    }
-
-    private void createNewSearch(String location, String category) {
-        client.setLocation(location);
-        currSearch = new ParseObject(User.Search.CLASS_NAME);
-        currSearch.put(User.Search.KEY_LOCATION, location);
-        client.setCategory(category);
-        currSearch.put(User.Search.KEY_CATEGORY, category);
-        currSearch.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                // add the new search to the current user
-                currUser.getRelation(User.KEY_SEARCHES).add(currSearch);
-                currUser.saveInBackground();
-            }
-        });
-        // no results for this search have been seen yet, so set index to initial value
-        searchIndex = INITIAL_INDEX;
+        getYelpResults();
     }
 
     private void resumeSearch(ParseObject object) {
         // save the Parse search locally so the user's progress can be updated
         currSearch = object;
-        String location = currSearch.getString(User.Search.KEY_LOCATION);
+        String location = currSearch.getString(Search.KEY_LOCATION);
         client.setLocation(toBasicString(location));
-        String category = currSearch.getString(User.Search.KEY_CATEGORY);
-        if (category != null && !category.isEmpty()) {
-            client.setCategory(category);
-        }
+        searchParams = currSearch.getMap(Search.KEY_PARAMS);
         // initialize the user's last seen index to the previous result so they will be shown the one they saw last again
-        Number storedIndex = currSearch.getNumber(User.Search.KEY_SEARCH_INDEX);
+        Number storedIndex = currSearch.getNumber(Search.KEY_SEARCH_INDEX);
         if (storedIndex != null) {
             searchIndex = (int) storedIndex - 1;
         } else {
             searchIndex = INITIAL_INDEX;
         }
+        getYelpResults();
+    }
+
+    private String toBasicString(String string) {
+        String result = string.trim();
+        result = result.toLowerCase();
+        result = result.replaceAll(",", "");
+        return result;
     }
 
     public void getYelpResults() {
-
-        client.setBusinessSearch();
+        client.setBusinessSearch(searchParams);
         // tell API to only load results after the index of the last one seen
         client.setOffset(searchIndex + 1);
 
@@ -343,47 +322,22 @@ public class SwipeActivity extends AppCompatActivity {
         if (requestCode == FILTER_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Location currentLocation = Parcels.unwrap(data.getParcelableExtra("currentLocation"));
-                String category = data.getStringExtra("category");
+                searchParams = new HashMap<>();
+                searchParams.put("category", data.getStringExtra("category"));
+                searchParams.put("distance", data.getStringExtra("distance"));
+
                 if (currentLocation != null) {
                     client.useCurrentLocation(currentLocation);
-                    Log.i(TAG, "current location is not null");
                     currSearch = null;
-                    if (!category.isEmpty()) {
-                        client.setCategory(category);
-                    }
                     getYelpResults();
                     return;
                 }
                 String locationString = data.getStringExtra("locationString");
                 if (!locationString.isEmpty()) {
-                    if (category.isEmpty()) {
-                        setSearch(toBasicString(locationString));
-                    }
-                    else {
-                        setSearch(toBasicString(locationString), category);
-                    }
-                    return;
+                    setSearch(toBasicString(locationString));
                 }
             }
         }
-    }
-
-    private String toBasicString(String string) {
-        String result = string.trim();
-        result = result.toLowerCase();
-        result = result.replaceAll(",", "");
-        return result;
-    }
-
-    private void loadBusinessView(Business business) {
-        binding.tvName.setText(business.getName());
-        binding.tvCategories.setText(business.getCategoryString());
-        binding.tvLocation.setText(business.getLocation());
-        binding.tvPrice.setText(business.getPrice());
-        final int resourceId = getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
-                getPackageName());
-        binding.ivRating.setImageDrawable(ContextCompat.getDrawable(this, resourceId));
-        Glide.with(this).load(business.getPhotoURL()).into(binding.ivMainImage);
     }
 
     private void saveAndLoadNext(final Business business) {
@@ -445,7 +399,7 @@ public class SwipeActivity extends AppCompatActivity {
         searchIndex++;
         // save the progress through this search
         if (currSearch != null) {
-            currSearch.put(User.Search.KEY_SEARCH_INDEX, searchIndex);
+            currSearch.put(Search.KEY_SEARCH_INDEX, searchIndex);
             currSearch.saveInBackground();
         }
 
@@ -466,5 +420,16 @@ public class SwipeActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void loadBusinessView(Business business) {
+        binding.tvName.setText(business.getName());
+        binding.tvCategories.setText(business.getCategoryString());
+        binding.tvLocation.setText(business.getLocation());
+        binding.tvPrice.setText(business.getPrice());
+        final int resourceId = getResources().getIdentifier(business.getRatingDrawableName(true), "drawable",
+                getPackageName());
+        binding.ivRating.setImageDrawable(ContextCompat.getDrawable(this, resourceId));
+        Glide.with(this).load(business.getPhotoURL()).into(binding.ivMainImage);
     }
 }
