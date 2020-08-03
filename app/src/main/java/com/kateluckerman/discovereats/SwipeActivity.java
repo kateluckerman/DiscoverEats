@@ -324,6 +324,7 @@ public class SwipeActivity extends AppCompatActivity {
                 Location currentLocation = Parcels.unwrap(data.getParcelableExtra("currentLocation"));
                 searchParams = new HashMap<>();
                 searchParams.put("category", data.getStringExtra("category"));
+                searchParams.put("price", data.getStringExtra("price"));
                 searchParams.put("distance", data.getStringExtra("distance"));
 
                 if (currentLocation != null) {

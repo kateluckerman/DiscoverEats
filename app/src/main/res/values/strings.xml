@@ -31,4 +31,11 @@
     <string name="completed">Mark Completed</string>
     <string name="cancel">Cancel</string>
 
+    <string-array name="price_array">
+        <item></item>
+        <item>$</item>
+        <item>$$</item>
+        <item>$$$</item>
+        <item>$$$$</item>
+    </string-array>
 </resources>

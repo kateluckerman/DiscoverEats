@@ -60,6 +60,10 @@ public class YelpClient extends AsyncHttpClient {
         if (category == null || category.isEmpty())
             category = "restaurants";
         params.put("categories", category);
+        String price = inputParams.get("price");
+        if (price != null && !price.isEmpty()) {
+            params.put("price", price);
+        }
         String distance = inputParams.get("distance");
         if (distance != null && !distance.isEmpty()) {
             params.put("radius", distance);

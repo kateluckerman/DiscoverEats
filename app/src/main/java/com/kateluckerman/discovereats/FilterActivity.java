@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -25,6 +28,9 @@ import com.kateluckerman.discovereats.databinding.ActivityFilterBinding;
 
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -38,6 +44,7 @@ public class FilterActivity extends AppCompatActivity {
     private final int REQUEST_LOCATION_PERMISSION = 1;
 
     private Location currentLocation;
+    List<Integer> priceInterval;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +55,7 @@ public class FilterActivity extends AppCompatActivity {
 
         setCancel();
         setUseLocation();
+        setUpPriceChoice();
         setApply();
     }
 
@@ -98,8 +106,7 @@ public class FilterActivity extends AppCompatActivity {
                                 }
                             };
                             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
-                        }
-                        else {
+                        } else {
                             currentLocation = location;
                             binding.btnUseLocation.setBackgroundColor(getColor(R.color.colorPrimary));
                             Log.i(TAG, "Location: " + currentLocation.getLongitude() + " " + currentLocation.getLatitude());
@@ -108,6 +115,59 @@ public class FilterActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void setUpPriceChoice() {
+        setSpinner(binding.priceFrom);
+        setSpinner(binding.priceTo);
+
+        // initialize price interval to correspond with default option
+        priceInterval = new ArrayList<>();
+        priceInterval.add(0);
+        priceInterval.add(0);
+
+
+        binding.priceFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                priceInterval.set(0, i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        binding.priceTo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                priceInterval.set(1, i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+    }
+
+    private void setSpinner(Spinner priceSpinner) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.price_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        priceSpinner.setAdapter(adapter);
+    }
+
+    private String getPrice() {
+        String price = "";
+        if (priceInterval.get(0) == 0 || priceInterval.get(1) == 0)
+            return "";
+
+        // price interval should be in format "1, 2"
+        for (int i = priceInterval.get(0); i <= priceInterval.get(1); i++) {
+            price += i;
+            if (i != priceInterval.get(1)) {
+                price += ", ";
+            }
+        }
+        return price;
     }
 
     private void setApply() {
@@ -127,7 +187,24 @@ public class FilterActivity extends AppCompatActivity {
         intent.putExtra("locationString", binding.etLocation.getText().toString());
         intent.putExtra("currentLocation", Parcels.wrap(currentLocation));
         intent.putExtra("category", binding.etCategory.getText().toString());
-        intent.putExtra("distance", binding.etDistance.getText().toString());
+        intent.putExtra("price", getPrice());
+        intent.putExtra("distance", distanceInMeters());
+    }
+
+    private String distanceInMeters() {
+        if (binding.etDistance.getText().toString().isEmpty()) {
+            return "";
+        }
+        final double CONVERSION = 1609.34;
+        double distance;
+        try {
+            distance = Double.parseDouble(binding.etDistance.getText().toString());
+        } catch (NumberFormatException numberException) {
+            Toast.makeText(this, "Distance does not contain a valid number, try again", Toast.LENGTH_LONG).show();
+            return null;
+        }
+        distance = distance * CONVERSION;
+        return String.valueOf((int) distance);
     }
 
     @Override
