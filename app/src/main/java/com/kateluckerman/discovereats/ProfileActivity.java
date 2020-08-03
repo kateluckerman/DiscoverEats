@@ -148,6 +148,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(ProfileActivity.this, SwipeActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
                 finish();
             }
         });

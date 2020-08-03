@@ -300,6 +300,7 @@ public class SwipeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(SwipeActivity.this, ProfileActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
                 finish();
             }
         });
