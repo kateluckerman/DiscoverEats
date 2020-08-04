@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
@@ -12,10 +14,10 @@ import android.util.Log;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
-import com.codepath.asynchttpclient.AsyncHttpClient;
-import com.codepath.asynchttpclient.RequestHeaders;
-import com.codepath.asynchttpclient.RequestParams;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.kateluckerman.discovereats.databinding.ActivityDetailsBinding;
 import com.kateluckerman.discovereats.models.Business;
 
@@ -25,15 +27,19 @@ import org.json.JSONObject;
 import java.util.List;
 
 import okhttp3.Headers;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class DetailsActivity extends AppCompatActivity {
 
     public static final String TAG = "DetailsActivity";
+    private final int REQUEST_LOCATION_PERMISSION = 1;
     public static final String YELP_SEARCH_ENDPOINT = "https://api.yelp.com/v3/businesses/";
 
     Business business;
     double searchLatitude;
     double searchLongitude;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private ActivityDetailsBinding binding;
 
@@ -43,16 +49,16 @@ public class DetailsActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_details);
 
         business = getIntent().getParcelableExtra("business");
-        // TODO: if location is enabled, use location first so that it works when clicking from the list view
+
         searchLatitude = getIntent().getDoubleExtra("searchLatitude", 0);
         searchLongitude = getIntent().getDoubleExtra("searchLongitude", 0);
 
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        RequestHeaders requestHeaders = new RequestHeaders();
-        requestHeaders.put("Authorization", "Bearer " + getString(R.string.yelp_api_key));
+        // request location to better calculate distance
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        requestLocationPermission();
 
-        client.get(YELP_SEARCH_ENDPOINT + business.getId(), requestHeaders, params, new JsonHttpResponseHandler() {
+        YelpClient client = new YelpClient(this);
+        client.get(YELP_SEARCH_ENDPOINT + business.getId(), client.headers, client.params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
@@ -153,6 +159,34 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private double metersToMiles(double meters) {
-        return meters*0.000621371192;
+        return meters * 0.000621371192;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @SuppressLint("MissingPermission")
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    public void requestLocationPermission() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            fusedLocationClient.getLastLocation().addOnSuccessListener(DetailsActivity.this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        searchLongitude = location.getLongitude();
+                        searchLatitude = location.getLatitude();
+                        setDistance();
+                    }
+                }
+            });
+        } else {
+            EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
+        }
     }
 }

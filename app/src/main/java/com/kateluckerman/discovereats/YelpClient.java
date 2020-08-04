@@ -14,7 +14,6 @@ public class YelpClient extends AsyncHttpClient {
     RequestParams params;
     RequestHeaders headers;
     Context context;
-    String categories;
     String endpoint;
 
     public static final String BUSINESS_SEARCH_ENDPOINT = "https://api.yelp.com/v3/businesses/search";
