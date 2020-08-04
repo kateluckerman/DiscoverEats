@@ -65,6 +65,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         setSwipeButton();
         setSettingsMenu();
+        binding.ivEditList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                turnOnListEditing();
+            }
+        });
+        setListEditingOptions();
 
         user = new User(ParseUser.getCurrentUser());
 
@@ -79,67 +86,32 @@ public class ProfileActivity extends AppCompatActivity {
         binding.rvList.setAdapter(adapter);
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
 
-        setListEdit();
+        getList();
+    }
 
-        binding.tvDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<Business> selected = adapter.getSelected();
-                // delete from view
-                allBusinesses.removeAll(selected);
-                adapter.notifyDataSetChanged();
-                for (Business business : selected) {
-                    user.getUser().getRelation(User.KEY_LIST).remove(business);
-                }
-                user.getUser().saveInBackground();
-                turnOffListEditing();
-            }
-        });
-
-        binding.tvCompleted.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<Business> selected = adapter.getSelected();
-                for (Business business : selected) {
-                    user.markCompleted(business);
-                }
-                turnOffListEditing();
-                adapter.notifyDataSetChanged();
-            }
-        });
-
-        // get the user's saved business list
-        ParseRelation<Business> list = user.getUser().getRelation(User.KEY_LIST);
-        list.getQuery().findInBackground(new FindCallback<Business>() {
-            @Override
-            public void done(List<Business> objects, ParseException e) {
-                if (e != null) {
-                    Log.e(TAG, "Error getting business list", e);
-                } else {
-                    allBusinesses.addAll(objects);
-                    // failed attempt to make the completed items go to the back of the list
-//                    for (Business business : objects) {
-//                        ParseRelation<Business> completed = user.getUser().getRelation(User.KEY_COMPLETED);
-//                        completed.getQuery().whereEqualTo(ParseObject.KEY_OBJECT_ID, business.getObjectId()).findInBackground(new FindCallback<Business>() {
-//                            @Override
-//                            public void done(List<Business> matches, ParseException e) {
-//                                if (e != null) {
-//                                    Log.e(TAG, e.getMessage(), e);
-//                                    return;
-//                                }
-//                                if (matches == null || matches.isEmpty())
-//                                    return;
-//                                Log.i(TAG, "success finding completed matches");
-//                                allBusinesses.remove(matches.get(0));
-//                                allBusinesses.add(allBusinesses.size() - 1, matches.get(0));
-//                                adapter.notifyDataSetChanged();
-//                            }
-//                        });
-//                    }
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        });
+    private void getList() {
+        // user's saved business list
+        final ParseRelation<Business> list = user.getUser().getRelation(User.KEY_LIST);
+        // get user's completed business list
+        final ParseQuery<ParseObject> completedQuery = user.getUser().getRelation(User.KEY_COMPLETED).getQuery();
+        // first get businesses that aren't completed to be on top of list
+        list.getQuery().whereDoesNotMatchKeyInQuery(Business.KEY_OBJECT_ID, Business.KEY_OBJECT_ID, completedQuery)
+                .findInBackground(new FindCallback<Business>() {
+                    @Override
+                    public void done(List<Business> objects, ParseException e) {
+                        allBusinesses.addAll(objects);
+                        // then get completed businesses on bottom of list
+                        list.getQuery().whereMatchesKeyInQuery(Business.KEY_OBJECT_ID, Business.KEY_OBJECT_ID, completedQuery)
+                                .findInBackground(new FindCallback<Business>() {
+                                    @Override
+                                    public void done(List<Business> objects, ParseException e) {
+                                        Business.setCompleted(objects);
+                                        allBusinesses.addAll(objects);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+                    }
+                });
     }
 
     private void setSwipeButton() {
@@ -166,27 +138,51 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void setListEdit() {
-        binding.ivEditList.setOnClickListener(new View.OnClickListener() {
+    private void setListEditingOptions() {
+        binding.tvDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makeVisible(binding.llEditItems);
-                makeVisible(binding.tvCancelEdit);
-                makeGone(binding.ivEditList);
+                List<Business> selected = adapter.getSelected();
+                // delete from view
+                allBusinesses.removeAll(selected);
+                adapter.notifyDataSetChanged();
+                for (Business business : selected) {
+                    user.getUser().getRelation(User.KEY_LIST).remove(business);
+                }
+                user.getUser().saveInBackground();
+                turnOffListEditing();
+            }
+        });
 
-                makeGone(binding.llButtons);
-                makeGone(binding.llNames);
-                makeGone(binding.ivProfileImage);
-                makeGone(binding.ivSettings);
+        binding.tvCompleted.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<Business> selected = adapter.getSelected();
+                for (Business business : selected) {
+                    user.markCompleted(business);
+                }
+                turnOffListEditing();
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
 
-                adapter.turnOnListEditing();
+    private void turnOnListEditing() {
+        makeVisible(binding.llEditItems);
+        makeVisible(binding.tvCancelEdit);
+        makeGone(binding.ivEditList);
 
-                binding.tvCancelEdit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        turnOffListEditing();
-                    }
-                });
+        makeGone(binding.llButtons);
+        makeGone(binding.llNames);
+        makeGone(binding.ivProfileImage);
+        makeGone(binding.ivSettings);
+
+        adapter.turnOnListEditing();
+
+        binding.tvCancelEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                turnOffListEditing();
             }
         });
     }

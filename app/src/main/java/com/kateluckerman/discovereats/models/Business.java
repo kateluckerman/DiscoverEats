@@ -32,6 +32,8 @@ public class Business extends ParseObject {
     public List<String> tags;
     public boolean open_now;
 
+    public boolean completed;
+
     public static final String KEY_NAME = "name";
     public static final String KEY_CATEGORIES = "categories";
     public static final String KEY_LOCATION = "location";
@@ -44,7 +46,9 @@ public class Business extends ParseObject {
     public static final String KEY_ALIAS = "alias";
     public static final String KEY_ID = "businessID";
 
-    public Business() {}
+    public Business() {
+        completed = false;
+    }
 
     public String getName() {
         return name;
@@ -159,6 +163,12 @@ public class Business extends ParseObject {
         website = getString(KEY_WEBSITE);
         alias = getString(KEY_ALIAS);
         id = getString(KEY_ID);
+    }
+
+    public static void setCompleted(List<Business> businesses) {
+        for (int i = 0; i < businesses.size(); i++) {
+            businesses.get(i).completed = true;
+        }
     }
 
     // convert list of categories to comma separated string

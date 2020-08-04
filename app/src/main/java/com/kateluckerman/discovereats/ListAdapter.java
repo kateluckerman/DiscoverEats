@@ -110,16 +110,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             binding.ivRating.setImageDrawable(ContextCompat.getDrawable(context, resourceId));
             Glide.with(context).load(business.getPhotoURL()).into(binding.ivMainImage);
 
-            ParseUser.getCurrentUser().getRelation(User.KEY_COMPLETED).getQuery().whereEqualTo(Business.KEY_ALIAS, business.getAlias()).findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> objects, ParseException e) {
-                    if (objects == null || objects.isEmpty()) {
-                        binding.getRoot().setBackgroundColor(context.getColor(R.color.white));
-                        return;
-                    }
-                    binding.getRoot().setBackgroundColor(context.getColor(R.color.light_gray));
-                }
-            });
+            if (business.completed) {
+                binding.getRoot().setBackgroundColor(context.getColor(R.color.light_gray));
+            } else {
+                binding.getRoot().setBackgroundColor(context.getColor(R.color.white));
+            }
 
             // if this business has already been selected in this session
             if (selected.contains(business)) {

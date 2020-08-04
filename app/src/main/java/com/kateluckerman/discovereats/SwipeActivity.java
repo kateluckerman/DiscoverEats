@@ -427,7 +427,7 @@ public class SwipeActivity extends AppCompatActivity {
         }
 
         // check if user has already saved the next result in their list
-        ParseQuery<ParseObject> listQuery = currUser.getRelation("list").getQuery();
+        ParseQuery<ParseObject> listQuery = currUser.getRelation(User.KEY_LIST).getQuery();
         listQuery.whereEqualTo(Business.KEY_ALIAS, businesses.get(APIresultIndex).getAlias());
         listQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
