@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -218,16 +220,34 @@ public class SwipeActivity extends AppCompatActivity {
         binding.ivHeart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveAndLoadNext(businesses.get(APIresultIndex));
+                like();
             }
         });
         // set x icon click to load next
         binding.ivX.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadNextResult();
+                dislike();
             }
         });
+    }
+
+    private void like() {
+        // like button bounces
+        final Animation myAnim = AnimationUtils.loadAnimation(SwipeActivity.this, R.anim.bounce);
+        myAnim.setInterpolator(SwipeActivity.this, android.R.anim.bounce_interpolator);
+        binding.ivHeart.startAnimation(myAnim);
+
+        saveAndLoadNext(businesses.get(APIresultIndex));
+    }
+
+    private void dislike() {
+        // X button bounces
+        final Animation myAnim = AnimationUtils.loadAnimation(SwipeActivity.this, R.anim.bounce);
+        myAnim.setInterpolator(SwipeActivity.this, android.R.anim.bounce_interpolator);
+        binding.ivX.startAnimation(myAnim);
+
+        loadNextResult();
     }
 
     // chose to suppress accessibility warning because buttons can also be used instead of swiping
@@ -278,12 +298,12 @@ public class SwipeActivity extends AppCompatActivity {
                             // swipe right to left
                             if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
                                     && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                                loadNextResult();
+                                dislike();
                             }
                             // swipe left to right
                             else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
                                     && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                                saveAndLoadNext(businesses.get(APIresultIndex));
+                                like();
                             }
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage(), e);
@@ -312,6 +332,7 @@ public class SwipeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(SwipeActivity.this, FilterActivity.class);
                 startActivityForResult(intent, FILTER_REQUEST_CODE);
+                overridePendingTransition(R.anim.slide_in_left, 0);
             }
         });
     }
