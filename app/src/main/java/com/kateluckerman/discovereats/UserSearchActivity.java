@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.SearchView;
 
 import com.kateluckerman.discovereats.databinding.ActivityUserSearchBinding;
 import com.kateluckerman.discovereats.models.User;
@@ -39,7 +40,7 @@ public class UserSearchActivity extends AppCompatActivity {
         binding.rvList.setAdapter(adapter);
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
 
-        ParseQuery<ParseUser> allUsers = ParseUser.getQuery();
+        final ParseQuery<ParseUser> allUsers = ParseUser.getQuery();
         allUsers.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
@@ -49,6 +50,34 @@ public class UserSearchActivity extends AppCompatActivity {
                 users.addAll(User.getUserList(objects));
                 Log.i(TAG, "" + users.size());
                 adapter.notifyDataSetChanged();
+            }
+        });
+
+
+        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                ParseQuery<ParseUser> inUsername = ParseUser.getQuery().whereContains(User.KEY_USERNAME, s);
+                ParseQuery<ParseUser> inName = ParseUser.getQuery().whereContains(User.KEY_NAME, s);
+
+                List<ParseQuery<ParseUser>> userOrName = new ArrayList<>();
+                userOrName.add(inUsername);
+                userOrName.add(inName);
+
+                ParseQuery.or(userOrName).findInBackground(new FindCallback<ParseUser>() {
+                    @Override
+                    public void done(List<ParseUser> objects, ParseException e) {
+                        users.clear();
+                        users.addAll(User.getUserList(objects));
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+                return true;
             }
         });
     }

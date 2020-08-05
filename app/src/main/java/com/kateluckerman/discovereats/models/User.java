@@ -16,7 +16,7 @@ public class User {
     public static final String KEY_LIST = "list";
     public static final String KEY_SEARCHES = "searches";
     public static final String KEY_COMPLETED = "completed";
-    public static final String CLASS_NAME = "User";
+    public static final String KEY_USERNAME = "username";
 
     public ParseUser user;
 
