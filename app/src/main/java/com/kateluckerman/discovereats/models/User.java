@@ -3,6 +3,9 @@ package com.kateluckerman.discovereats.models;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 
+import org.parceler.Parcel;
+
+@Parcel
 public class User {
 
     public static final String KEY_NAME = "name";
@@ -12,6 +15,9 @@ public class User {
     public static final String KEY_COMPLETED = "completed";
 
     public ParseUser user;
+
+    // empty constructor for parceler purposes
+    public User() {}
 
     public User(ParseUser user) {
         this.user = user;

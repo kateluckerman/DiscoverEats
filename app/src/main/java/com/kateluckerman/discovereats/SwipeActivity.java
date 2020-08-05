@@ -319,6 +319,7 @@ public class SwipeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(SwipeActivity.this, ProfileActivity.class);
+                intent.putExtra("user", Parcels.wrap(new User(currUser)));
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
                 finish();

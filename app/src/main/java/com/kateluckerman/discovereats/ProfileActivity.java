@@ -37,6 +37,8 @@ import com.parse.ParseRelation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import org.parceler.Parcels;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -63,18 +65,21 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_profile);
 
+        user = Parcels.unwrap(getIntent().getParcelableExtra("user"));
+
+        // if it's the current user's profile, allow them to edit
+        if (user.getUser().getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
+            setSettingsMenu();
+            binding.ivEditList.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    turnOnListEditing();
+                }
+            });
+            setListEditingOptions();
+        }
+
         setSwipeButton();
-        setSettingsMenu();
-        binding.ivEditList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                turnOnListEditing();
-            }
-        });
-        setListEditingOptions();
-
-        user = new User(ParseUser.getCurrentUser());
-
         // set name and username in view and initialize business array
         setName(binding.tvName);
         setProfileImage();
