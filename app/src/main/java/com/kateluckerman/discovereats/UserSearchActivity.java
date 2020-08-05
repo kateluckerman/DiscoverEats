@@ -13,7 +13,6 @@ import com.kateluckerman.discovereats.databinding.ActivityUserSearchBinding;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
@@ -39,7 +38,7 @@ public class UserSearchActivity extends AppCompatActivity {
         currentUser = ParseUser.getCurrentUser();
 
         users = new ArrayList<>();
-        adapter = new UserSearchAdapter(this, users);
+        adapter = new UserSearchAdapter(this, users, false);
         binding.rvList.setAdapter(adapter);
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
 
@@ -71,7 +70,7 @@ public class UserSearchActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String s) {
                 ParseQuery<ParseUser> inUsername = ParseUser.getQuery().whereContains(User.KEY_USERNAME, s);
                 ParseQuery<ParseUser> inName = ParseUser.getQuery().whereContains(User.KEY_NAME, s);
-                
+
                 List<ParseQuery<ParseUser>> userOrName = new ArrayList<>();
                 userOrName.add(inUsername);
                 userOrName.add(inName);

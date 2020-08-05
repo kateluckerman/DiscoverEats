@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.kateluckerman.discovereats.ProfileActivity;
+import com.kateluckerman.discovereats.R;
 import com.kateluckerman.discovereats.databinding.ItemUserBinding;
 import com.kateluckerman.discovereats.models.User;
 
@@ -23,11 +24,13 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
 
     Context context;
     List<User> users;
+    boolean friends;
 
 
-    public UserSearchAdapter(Context context, List<User> users) {
+    public UserSearchAdapter(Context context, List<User> users, boolean friends) {
         this.context = context;
         this.users = users;
+        this.friends = friends;
     }
 
     @NonNull
@@ -68,18 +71,27 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
             });
             if (user.getName() != null) {
                 binding.tvName.setText(user.getName());
+            } else {
+                binding.tvName.setText("");
             }
             binding.tvUsername.setText(user.getUsername());
             if (user.getProfileImage() != null) {
                 Glide.with(context).load(user.getProfileImage().getUrl()).transform(new CircleCrop()).into(binding.ivProfileImage);
+            } else {
+                binding.ivProfileImage.setImageResource(0);
             }
 
             binding.ivAddFriend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     user.addFriend();
+                    binding.ivAddFriend.setBackground(context.getDrawable(R.drawable.edit_background));
                 }
             });
+
+            if (friends) {
+                binding.ivAddFriend.setVisibility(View.GONE);
+            }
         }
     }
 }

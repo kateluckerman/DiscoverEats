@@ -78,7 +78,6 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
             setListEditingOptions();
-            // TODO: set the top buttons to be visible
             makeVisible(binding.llButtons);
             makeVisible(binding.ivEditList);
             makeVisible(binding.ivSettings);
@@ -86,6 +85,13 @@ public class ProfileActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(ProfileActivity.this, UserSearchActivity.class);
+                    startActivity(intent);
+                }
+            });
+            binding.ivFriends.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(ProfileActivity.this, FriendsActivity.class);
                     startActivity(intent);
                 }
             });
