@@ -8,11 +8,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.SearchView;
 
+import com.kateluckerman.discovereats.adapters.UserSearchAdapter;
 import com.kateluckerman.discovereats.databinding.ActivityUserSearchBinding;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
@@ -40,7 +43,11 @@ public class UserSearchActivity extends AppCompatActivity {
         binding.rvList.setAdapter(adapter);
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
 
-        final ParseQuery<ParseUser> allUsers = ParseUser.getQuery();
+        ParseRelation<ParseUser> friends = ParseUser.getCurrentUser().getRelation(User.KEY_FRIENDS);
+        final ParseQuery<ParseUser> friendsQuery = friends.getQuery();
+
+        final ParseQuery<ParseUser> allUsers = ParseUser.getQuery().whereDoesNotMatchKeyInQuery(ParseUser.KEY_OBJECT_ID, ParseUser.KEY_OBJECT_ID, friendsQuery);
+        allUsers.whereNotEqualTo(ParseUser.KEY_OBJECT_ID, ParseUser.getCurrentUser().getObjectId());
         allUsers.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
@@ -64,12 +71,14 @@ public class UserSearchActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String s) {
                 ParseQuery<ParseUser> inUsername = ParseUser.getQuery().whereContains(User.KEY_USERNAME, s);
                 ParseQuery<ParseUser> inName = ParseUser.getQuery().whereContains(User.KEY_NAME, s);
-
+                
                 List<ParseQuery<ParseUser>> userOrName = new ArrayList<>();
                 userOrName.add(inUsername);
                 userOrName.add(inName);
 
-                ParseQuery.or(userOrName).findInBackground(new FindCallback<ParseUser>() {
+                ParseQuery.or(userOrName).whereDoesNotMatchKeyInQuery(ParseUser.KEY_OBJECT_ID, ParseUser.KEY_OBJECT_ID, friendsQuery)
+                        .whereNotEqualTo(ParseUser.KEY_OBJECT_ID, ParseUser.getCurrentUser().getObjectId())
+                        .findInBackground(new FindCallback<ParseUser>() {
                     @Override
                     public void done(List<ParseUser> objects, ParseException e) {
                         users.clear();

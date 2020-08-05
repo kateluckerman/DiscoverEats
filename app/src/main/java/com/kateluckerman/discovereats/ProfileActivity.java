@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.kateluckerman.discovereats.adapters.ListAdapter;
 import com.kateluckerman.discovereats.databinding.ActivityProfileBinding;
 import com.kateluckerman.discovereats.models.Business;
 import com.kateluckerman.discovereats.models.User;
@@ -78,6 +79,9 @@ public class ProfileActivity extends AppCompatActivity {
             });
             setListEditingOptions();
             // TODO: set the top buttons to be visible
+            makeVisible(binding.llButtons);
+            makeVisible(binding.ivEditList);
+            makeVisible(binding.ivSettings);
             binding.ivSearch.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

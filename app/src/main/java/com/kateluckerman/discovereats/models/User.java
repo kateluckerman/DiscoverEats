@@ -17,6 +17,7 @@ public class User {
     public static final String KEY_SEARCHES = "searches";
     public static final String KEY_COMPLETED = "completed";
     public static final String KEY_USERNAME = "username";
+    public static final String KEY_FRIENDS = "friends";
 
     public ParseUser user;
 
@@ -63,5 +64,10 @@ public class User {
     public void markCompleted(Business business) {
         user.getRelation(KEY_COMPLETED).add(business);
         user.saveInBackground();
+    }
+
+    public void addFriend() {
+        ParseUser.getCurrentUser().getRelation(KEY_FRIENDS).add(user);
+        ParseUser.getCurrentUser().saveInBackground();
     }
 }

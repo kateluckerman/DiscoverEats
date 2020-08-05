@@ -1,4 +1,4 @@
-package com.kateluckerman.discovereats;
+package com.kateluckerman.discovereats.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.kateluckerman.discovereats.DetailsActivity;
+import com.kateluckerman.discovereats.R;
 import com.kateluckerman.discovereats.databinding.ItemRestaurantBinding;
 import com.kateluckerman.discovereats.models.Business;
 
