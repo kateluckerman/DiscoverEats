@@ -13,11 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.kateluckerman.discovereats.databinding.ItemRestaurantBinding;
 import com.kateluckerman.discovereats.models.Business;
-import com.kateluckerman.discovereats.models.User;
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,6 +5,9 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Parcel
 public class User {
 
@@ -13,6 +16,7 @@ public class User {
     public static final String KEY_LIST = "list";
     public static final String KEY_SEARCHES = "searches";
     public static final String KEY_COMPLETED = "completed";
+    public static final String CLASS_NAME = "User";
 
     public ParseUser user;
 
@@ -46,6 +50,14 @@ public class User {
 
     public void setProfileImage(ParseFile photoFile) {
         user.put(KEY_PROFILE_IMAGE, photoFile);
+    }
+
+    public static List<User> getUserList(List<ParseUser> parseUserList) {
+        List<User> userList = new ArrayList<>();
+        for (ParseUser user : parseUserList) {
+            userList.add(new User(user));
+        }
+        return userList;
     }
 
     public void markCompleted(Business business) {
