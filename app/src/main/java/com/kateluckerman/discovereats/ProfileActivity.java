@@ -77,6 +77,14 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
             setListEditingOptions();
+            // TODO: set the top buttons to be visible
+            binding.ivSearch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(ProfileActivity.this, UserSearchActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
 
         setSwipeButton();
