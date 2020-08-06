@@ -54,12 +54,16 @@ public class FilterActivity extends AppCompatActivity {
     private Location currentLocation;
     List<Integer> priceInterval;
 
+    static Intent intent;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_filter);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        intent = new Intent();
 
         setCancel();
         setUseLocation();
@@ -184,7 +188,6 @@ public class FilterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 //                fusedLocationClient.removeLocationUpdates(new LocationCallback());
-                Intent intent = new Intent();
                 putIntentExtras(intent);
                 setResult(RESULT_OK, intent);
                 finish();
@@ -277,5 +280,9 @@ public class FilterActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    public static void onCategorySelected(Category category) {
+        intent.putExtra("category", category.getAlias());
     }
 }

@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kateluckerman.discovereats.FilterActivity;
 import com.kateluckerman.discovereats.R;
 import com.kateluckerman.discovereats.models.Category;
 
@@ -18,6 +19,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     Context context;
     List<Category> categories;
+
     public CategoryAdapter(Context context, List<Category> categories) {
         this.context = context;
         this.categories = categories;
@@ -50,8 +52,17 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             tvTitle = itemView.findViewById(R.id.tvTitle);
         }
 
-        public void bind(Category category) {
+        public void bind(final Category category) {
             tvTitle.setText(category.getTitle());
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FilterActivity.onCategorySelected(category);
+                    itemView.setBackgroundColor(context.getColor(R.color.colorPrimary));
+                }
+            });
+
         }
     }
 }
