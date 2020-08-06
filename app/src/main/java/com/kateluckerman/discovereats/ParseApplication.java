@@ -3,6 +3,7 @@ package com.kateluckerman.discovereats;
 import android.app.Application;
 
 import com.kateluckerman.discovereats.models.Business;
+import com.kateluckerman.discovereats.models.Category;
 import com.kateluckerman.discovereats.models.User;
 import com.parse.Parse;
 import com.parse.ParseObject;
@@ -18,6 +19,7 @@ public class ParseApplication extends Application {
         super.onCreate();
 
         ParseObject.registerSubclass(Business.class);
+        ParseObject.registerSubclass(Category.class);
 
         // Use for troubleshooting -- remove this line for production
         Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);

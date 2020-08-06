@@ -23,6 +23,8 @@
             android:layout_marginStart="36dp"
             android:layout_marginTop="36dp"
             android:layout_toStartOf="@id/ivCancel"
+            android:layout_alignParentTop="true"
+            android:layout_above="@id/btnApply"
             android:orientation="vertical">
 
             <TextView
@@ -67,12 +69,20 @@
                 android:textColor="@color/black"
                 android:textSize="24sp" />
 
-            <EditText
-                android:id="@+id/etCategory"
+            <SearchView
+                android:id="@+id/categorySearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Start typing to search categories" />
+                android:iconifiedByDefault="false"
+                android:queryHint="Start typing to search categories" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCategories"
+                android:layout_weight="1"
+                android:layout_marginTop="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp" />
 
             <TextView
                 android:id="@+id/tvPrice"
@@ -124,7 +134,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="Enter maximum distance in miles" />
-
 
         </LinearLayout>
 

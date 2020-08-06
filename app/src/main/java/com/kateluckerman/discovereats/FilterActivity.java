@@ -2,6 +2,7 @@ package com.kateluckerman.discovereats;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -24,7 +26,13 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.kateluckerman.discovereats.adapters.CategoryAdapter;
 import com.kateluckerman.discovereats.databinding.ActivityFilterBinding;
+import com.kateluckerman.discovereats.models.Category;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import org.parceler.Parcels;
 
@@ -57,6 +65,8 @@ public class FilterActivity extends AppCompatActivity {
         setUseLocation();
         setUpPriceChoice();
         setApply();
+
+        setUpCategorySearch();
     }
 
     private void setCancel() {
@@ -78,7 +88,6 @@ public class FilterActivity extends AppCompatActivity {
                 binding.etLocation.setText("");
                 requestLocationPermission();
 
-                //TODO: Location requests are currently not working on physical device
                 fusedLocationClient.getLastLocation().addOnSuccessListener(FilterActivity.this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
@@ -186,7 +195,7 @@ public class FilterActivity extends AppCompatActivity {
     private void putIntentExtras(Intent intent) {
         intent.putExtra("locationString", binding.etLocation.getText().toString());
         intent.putExtra("currentLocation", Parcels.wrap(currentLocation));
-        intent.putExtra("category", binding.etCategory.getText().toString());
+//        intent.putExtra("category", binding.etCategory.getText().toString());
         intent.putExtra("price", getPrice());
         intent.putExtra("distance", distanceInMeters());
     }
@@ -221,5 +230,52 @@ public class FilterActivity extends AppCompatActivity {
         if (!EasyPermissions.hasPermissions(this, perms)) {
             EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
         }
+    }
+
+    private void setUpCategorySearch() {
+
+        binding.categorySearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                binding.btnApply.setVisibility(View.GONE);
+            }
+        });
+
+        final List<Category> categories = new ArrayList<>();
+        final CategoryAdapter adapter = new CategoryAdapter(this, categories);
+        binding.rvCategories.setAdapter(adapter);
+        binding.rvCategories.setLayoutManager(new LinearLayoutManager(this));
+
+        final ParseQuery<Category> categoryQuery = ParseQuery.getQuery("Category");
+
+        categoryQuery.findInBackground(new FindCallback<Category>() {
+            @Override
+            public void done(List<Category> objects, ParseException e) {
+                categories.clear();
+                categories.addAll(objects);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        binding.categorySearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                categoryQuery.whereStartsWith("title", s);
+                categoryQuery.findInBackground(new FindCallback<Category>() {
+                    @Override
+                    public void done(List<Category> objects, ParseException e) {
+                        categories.clear();
+                        categories.addAll(objects);
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+                return true;
+            }
+        });
     }
 }

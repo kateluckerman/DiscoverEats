@@ -181,8 +181,8 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 List<Business> selected = adapter.getSelected();
-                for (Business business : selected) {
-                    user.markCompleted(business);
+                for (int i = 0; i < selected.size(); i++) {
+                    user.markCompleted(selected.get(i));
                 }
                 turnOffListEditing();
                 adapter.notifyDataSetChanged();

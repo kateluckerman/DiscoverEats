@@ -19,7 +19,9 @@
         <activity android:name=".FriendsActivity"></activity>
         <activity android:name=".UserSearchActivity" />
         <activity android:name=".DetailsActivity" />
-        <activity android:name=".FilterActivity" />
+        <activity
+            android:name=".FilterActivity"
+            android:windowSoftInputMode="adjustPan" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".SwipeActivity" />
         <activity android:name=".LoginActivity">

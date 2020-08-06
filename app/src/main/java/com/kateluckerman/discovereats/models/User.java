@@ -63,6 +63,7 @@ public class User {
 
     public void markCompleted(Business business) {
         user.getRelation(KEY_COMPLETED).add(business);
+        business.completed = true;
         user.saveInBackground();
     }
 
