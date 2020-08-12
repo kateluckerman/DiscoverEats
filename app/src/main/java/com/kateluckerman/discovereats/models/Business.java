@@ -24,7 +24,7 @@ public class Business extends ParseObject {
     public String website;
     public String alias;
     public String id;
-    public String address = "";
+    public String address;
     public int reviewCount;
     public double latitude;
     public double longitude;
@@ -120,6 +120,7 @@ public class Business extends ParseObject {
     public void fromDetailsJSON(JSONObject jsonObject) throws JSONException {
         this.reviewCount = jsonObject.getInt("review_count");
         JSONArray displayAddress = jsonObject.getJSONObject("location").getJSONArray("display_address");
+        this.address = "";
         for (int i = 0; i < displayAddress.length(); i++) {
             this.address += displayAddress.getString(i) + " ";
         }

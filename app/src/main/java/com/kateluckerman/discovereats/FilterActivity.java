@@ -187,10 +187,13 @@ public class FilterActivity extends AppCompatActivity {
         binding.btnApply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                fusedLocationClient.removeLocationUpdates(new LocationCallback());
-                putIntentExtras(intent);
-                setResult(RESULT_OK, intent);
-                finish();
+                if (currentLocation != null || !binding.etLocation.getText().toString().isEmpty()) {
+                    putIntentExtras(intent);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } else {
+                    Toast.makeText(FilterActivity.this, "You must select a location", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -249,7 +252,7 @@ public class FilterActivity extends AppCompatActivity {
         binding.rvCategories.setAdapter(adapter);
         binding.rvCategories.setLayoutManager(new LinearLayoutManager(this));
 
-        final ParseQuery<Category> categoryQuery = ParseQuery.getQuery("Category");
+        final ParseQuery<Category> categoryQuery = ParseQuery.getQuery(Category.CLASS_NAME);
 
         categoryQuery.findInBackground(new FindCallback<Category>() {
             @Override

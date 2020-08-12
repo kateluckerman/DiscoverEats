@@ -129,7 +129,6 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void setImages() {
-        // TODO: Error handling in the case that there are less than three photos
         Glide.with(this).load(business.photoURLS.get(0)).into(binding.ivImage1);
         Glide.with(this).load(business.photoURLS.get(1)).into(binding.ivImage2);
         Glide.with(this).load(business.photoURLS.get(2)).into(binding.ivImage3);

@@ -51,11 +51,12 @@
         <ImageView
             android:id="@+id/ivProfileImage"
             android:layout_width="68dp"
-            android:layout_height="wrap_content"
+            android:layout_height="68dp"
             android:layout_alignTop="@+id/llNames"
             android:layout_alignBottom="@+id/llNames"
             android:layout_alignParentStart="true"
             android:layout_marginStart="12dp"
+            android:layout_centerVertical="true"
             android:scaleType="centerCrop"
             android:src="@drawable/add_icon"
             android:visibility="gone" />

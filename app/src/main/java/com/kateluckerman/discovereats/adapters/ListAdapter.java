@@ -108,7 +108,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             Glide.with(context).load(business.getPhotoURL()).into(binding.ivMainImage);
 
             if (business.completed) {
-                binding.getRoot().setBackgroundColor(context.getColor(R.color.light_gray));
+                binding.getRoot().setBackgroundColor(context.getColor(R.color.very_light_gray));
             } else {
                 binding.getRoot().setBackgroundColor(context.getColor(R.color.white));
             }
